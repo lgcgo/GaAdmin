@@ -12,3 +12,15 @@ database:
     type: "mysql"
     link: "root:123456@tcp(127.0.0.1:3306)/gaadmin"
 
+jwt:
+  signKey: "Irir39gjfidfFkfiflMjdEw3iuUyefw0"
+  claims:
+    issuer: "gaadmin.com"
+  accessToken:
+    expireTime: 2h
+  refreshToken:
+    expireTime: 72h 
+
+casbin:
+  modelFilePath: "./manifest/config/casbin/model.conf"
+  policyFilePath: "./manifest/config/casbin/policy.csv"
