@@ -26,8 +26,9 @@ func (c *cUserSign) SignUp(ctx context.Context, req *v1.UserSignUpReq) (*v1.User
 	)
 
 	// 校验验证码
-	// 待补充...
-
+	if err = service.Sms().Verify(ctx, req.Captcha, "register"); err != nil {
+		return nil, err
+	}
 	// 格式化创建
 	if err = gconv.Struct(req, &in); err != nil {
 		return nil, err
@@ -66,8 +67,37 @@ func (c *cUserSign) SignPassport(ctx context.Context, req *v1.UserSignPassportRe
 	if err = gconv.Struct(req, &in); err != nil {
 		return nil, err
 	}
-	// 设置默认用户组ID
+	// 账号登录
 	if ent, err = service.User().SignPassport(ctx, in); err != nil {
+		return nil, err
+	}
+	// 生成授权Token
+	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, []string{"root"}); err != nil {
+		return nil, err
+	}
+	// 格式化响应
+	if err = gconv.Struct(out, &res); err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+// 手机号 + 验证码 登录
+func (c *cUserSign) SignMobile(ctx context.Context, req *v1.UserSignMobileReq) (*v1.UserSignMobileRes, error) {
+	var (
+		res *v1.UserSignMobileRes
+		err error
+		in  *model.UserSignMobile
+		out *model.TokenOutput
+		ent *entity.User
+	)
+	// 格式化登录
+	if err = gconv.Struct(req, &in); err != nil {
+		return nil, err
+	}
+	// 手机号登录
+	if ent, err = service.User().SignMobile(ctx, in); err != nil {
 		return nil, err
 	}
 	// 生成授权Token

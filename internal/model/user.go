@@ -42,11 +42,6 @@ type UserSignMobile struct {
 	Captcha string
 }
 
-type UserSignEmail struct {
-	Email   string
-	Captcha string
-}
-
 /**
 * 分组管理
 **/

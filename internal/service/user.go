@@ -42,7 +42,6 @@ type IUser interface {
 	UpdateCurrentUserPassword(ctx context.Context, password string) error
 	SignPassport(ctx context.Context, in *model.UserSignPassportInput) (*entity.User, error)
 	SignMobile(ctx context.Context, in *model.UserSignMobile) (*entity.User, error)
-	SignEmail(ctx context.Context, in *model.UserSignEmail) (*entity.User, error)
 	IsUserAccountAvailable(ctx context.Context, account string, notIds ...uint) (bool, error)
 	IsUserMobileAvailable(ctx context.Context, mobile string, notIds ...uint) (bool, error)
 	IsUserEmailAvailable(ctx context.Context, email string, notIds ...uint) (bool, error)

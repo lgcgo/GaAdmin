@@ -24,13 +24,16 @@ var (
 					middleware.Response, // 默认响应
 				)
 				group.Bind(
-					controller.AuthRule,
-					controller.AuthMenu,
-					controller.Org,
-					controller.OrgMember,
-					controller.User,
-					controller.UserGroup,
-					controller.UserGroupAccess,
+					controller.UserSign, // 用户登录
+				)
+				group.Bind(
+					controller.AuthRule,        // 权限规则
+					controller.AuthMenu,        // 权限菜单
+					controller.Org,             // 组织机构
+					controller.OrgMember,       // 组织成员
+					controller.User,            // 用户
+					controller.UserGroup,       // 用户分组
+					controller.UserGroupAccess, // 用户分组权限
 				)
 			})
 			s.Run()

@@ -214,23 +214,30 @@ type UserSignMobileRes struct {
 type UserSignOutReq struct {
 	g.Meta `path:"/user/sign-out" method:"put" tags:"UserService" summary:"Sign out"`
 }
-
 type UserSignOutRes struct{}
 
-// 手机密码重置
-type UserPasswordResetMobileReq struct {
+// 手机 密码重置
+type UserResetMobileReq struct {
 	g.Meta  `path:"/user/password/reset-mobile" tags:"UserService" method:"post" summary:"Reset password mobile"`
 	Email   string `json:"email" v:"required"`
 	Captcha string `json:"captcha" v:"required"`
 }
-type UserPasswordResetMobileRes struct {
+type UserResetMobileRes struct {
 }
 
-// 邮件密码重置
-type UserPasswordResetEmailReq struct {
+// 邮件 密码重置
+type UserResetEmailReq struct {
 	g.Meta  `path:"/user/password/reset-email" tags:"UserService" method:"post" summary:"Reset password email"`
 	Email   string `json:"email" v:"required"`
 	Captcha string `json:"captcha" v:"required"`
 }
-type UserPasswordResetEmailRes struct {
+type UserResetEmailRes struct {
+}
+
+// 问答 密码重置
+type UserResetQuestionReq struct {
+	g.Meta  `path:"/user/password/reset-question" tags:"UserService" method:"post" summary:"Reset password question"`
+	Answers []string `json:"answers" v:"required"`
+}
+type UserResetQuestionRes struct {
 }

@@ -505,26 +505,6 @@ func (s *sUser) SignMobile(ctx context.Context, in *model.UserSignMobile) (*enti
 	return ent, nil
 }
 
-// 手机号 + 验证码 登录
-func (s *sUser) SignEmail(ctx context.Context, in *model.UserSignEmail) (*entity.User, error) {
-	var (
-		ent *entity.User
-		err error
-	)
-
-	// 查找用户
-	if err = dao.User.Ctx(ctx).Where(dao.User.Columns().Mobile, in.Email).Scan(&ent); err != nil {
-		return nil, err
-	}
-	if ent == nil {
-		return nil, gerror.Newf("email is not find: %s", in.Email)
-	}
-	// 校验验证码
-	// 待补充...
-
-	return ent, nil
-}
-
 // 检测账号
 func (s *sUser) IsUserAccountAvailable(ctx context.Context, account string, notIds ...uint) (bool, error) {
 	var (
