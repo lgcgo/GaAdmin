@@ -8,6 +8,7 @@ import (
 	_ "GaAdmin/internal/logic/auth"
 	_ "GaAdmin/internal/logic/context"
 	_ "GaAdmin/internal/logic/oauth"
+	_ "GaAdmin/internal/logic/org"
 	_ "GaAdmin/internal/logic/sms"
 	_ "GaAdmin/internal/logic/user"
 )
