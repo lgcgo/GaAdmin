@@ -5,6 +5,7 @@ import (
 	"GaAdmin/internal/model"
 	"GaAdmin/internal/model/do"
 	"GaAdmin/internal/model/entity"
+	"GaAdmin/internal/service"
 	"context"
 
 	"github.com/gogf/gf/v2/container/garray"
@@ -52,7 +53,7 @@ func (s *sUser) CreateGroup(ctx context.Context, in *model.UserGroupCreateInput)
 		return 0, err
 	}
 	// 更新授权政策
-	// 待补充...
+	service.Oauth().SavePolicy(ctx)
 
 	return uint(insertId), nil
 }
@@ -129,7 +130,7 @@ func (s *sUser) UpdateGroup(ctx context.Context, in *model.UserGroupUpdateInput)
 		return err
 	}
 	// 更新授权政策
-	// 待补充...
+	service.Oauth().SavePolicy(ctx)
 
 	return nil
 }
@@ -162,7 +163,7 @@ func (s *sUser) DeleteGroup(ctx context.Context, groupId uint) error {
 		return err
 	}
 	// 更新授权政策
-	// 待补充...
+	service.Oauth().SavePolicy(ctx)
 
 	return nil
 }
@@ -322,7 +323,7 @@ func (s *sUser) SetupGroupAccess(ctx context.Context, groupId uint, auth_rule_id
 		return err
 	}
 	// 更新授权政策
-	// 待补充...
+	service.Oauth().SavePolicy(ctx)
 
 	return nil
 }

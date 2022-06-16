@@ -115,7 +115,7 @@ func (s *sAuth) UpdateRule(ctx context.Context, in *model.AuthRuleUpdateInput) e
 		return err
 	}
 	// 更新授权政策
-	// 待补充...
+	service.Oauth().SavePolicy(ctx)
 
 	return nil
 }
@@ -150,7 +150,7 @@ func (s *sAuth) DeleteRule(ctx context.Context, ruleId uint) error {
 		return err
 	}
 	// 更新授权政策
-	// 待补充...
+	service.Oauth().SavePolicy(ctx)
 
 	return nil
 }
