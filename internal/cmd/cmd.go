@@ -19,11 +19,9 @@ var (
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				group.Middleware(
 					middleware.CORS,     // 允许跨域
+					middleware.Context,  // 初始化上下文对象
 					middleware.Response, // 默认响应
 				)
-				group.Bind()
-				// 权限认证路由
-				// group.Middleware(middleware.Authentication)
 				group.Bind()
 			})
 			s.Run()
