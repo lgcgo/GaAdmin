@@ -24,6 +24,8 @@ var (
 					middleware.Response, // 默认响应
 				)
 				group.Bind(
+					controller.AuthRule,
+					controller.AuthMenu,
 					controller.Org,
 					controller.OrgMember,
 					controller.User,
