@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"GaAdmin/internal/middleware"
 	"context"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -16,7 +17,13 @@ var (
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
 			s := g.Server()
 			s.Group("/", func(group *ghttp.RouterGroup) {
-				group.Middleware(ghttp.MiddlewareHandlerResponse)
+				group.Middleware(
+					middleware.CORS,     // 允许跨域
+					middleware.Response, // 默认相应
+				)
+				group.Bind()
+				// 权限认证路由
+				// group.Middleware(middleware.Authentication)
 				group.Bind()
 			})
 			s.Run()
