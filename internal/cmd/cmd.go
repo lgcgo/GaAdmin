@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"GaAdmin/internal/controller"
 	"GaAdmin/internal/middleware"
 	"context"
 
@@ -22,7 +23,11 @@ var (
 					middleware.Context,  // 初始化上下文对象
 					middleware.Response, // 默认响应
 				)
-				group.Bind()
+				group.Bind(
+					controller.User,
+					controller.UserGroup,
+					controller.UserGroupAccess,
+				)
 			})
 			s.Run()
 			return nil
