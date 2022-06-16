@@ -5,7 +5,6 @@ import (
 	"GaAdmin/internal/model"
 	"GaAdmin/internal/service"
 	"context"
-	"fmt"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
@@ -14,7 +13,6 @@ import (
 type sContext struct{}
 
 func init() {
-	fmt.Println("sContext init")
 	service.RegisterContext(New())
 }
 
