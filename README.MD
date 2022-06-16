@@ -17,7 +17,7 @@ GaAdmin是一款基于GoFrame+Antd的高颜值开发框架。
 
 # 接口清单
 ```shell
-ADDRESS | METHOD |        ROUTE        |                             HANDLER
+  ADDRESS | METHOD |        ROUTE        |                             HANDLER
 ----------|--------|---------------------|-----------------------------------------------------------------
   :8000   | DELETE | /auth/menu          | GaAdmin/internal/controller.(*cAuthMenu).Delete
 ----------|--------|---------------------|-----------------------------------------------------------------
