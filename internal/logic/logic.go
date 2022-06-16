@@ -6,4 +6,6 @@ package logic
 
 import (
 	_ "GaAdmin/internal/logic/context"
+	_ "GaAdmin/internal/logic/oauth"
+	_ "GaAdmin/internal/logic/user"
 )
