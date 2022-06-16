@@ -7,7 +7,7 @@ import (
 
 type sSms struct{}
 
-func Init() {
+func init() {
 	service.RegisterSms(New())
 }
 

@@ -20,7 +20,7 @@ import (
 
 type sUser struct{}
 
-func Init() {
+func init() {
 	service.RegisterUser(New())
 }
 

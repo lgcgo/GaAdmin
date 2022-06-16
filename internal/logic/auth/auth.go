@@ -4,7 +4,7 @@ import "GaAdmin/internal/service"
 
 type sAuth struct{}
 
-func Init() {
+func init() {
 	service.RegisterAuth(New())
 }
 
