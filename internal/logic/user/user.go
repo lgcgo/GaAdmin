@@ -20,6 +20,10 @@ import (
 
 type sUser struct{}
 
+func Init() {
+	service.RegisterUser(New())
+}
+
 func New() *sUser {
 	return &sUser{}
 }
