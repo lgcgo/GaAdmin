@@ -8,6 +8,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/util/gconv"
 )
 
 // 权限认证中间件
@@ -25,7 +26,7 @@ func Authentication(r *ghttp.Request) {
 		response.JsonErrorExit(r, "11003", "invalid token")
 	}
 	// 从签名中获取用户角色
-	issueRoles = claims["isr"].([]string)
+	issueRoles = gconv.Strings(claims["isr"])
 	// 验证权限
 	if ok, err = ser.CheckPath(r, issueRoles); err != nil {
 		response.JsonErrorExit(r, "-1", "system busy")

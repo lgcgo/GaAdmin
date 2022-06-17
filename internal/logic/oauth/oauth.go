@@ -88,9 +88,9 @@ func (s *sOauth) RefreshAuthorization(ctx context.Context, ticket string) (*mode
 	if claims, err = jwt.NewJwt().ParseToken(ticket); err != nil {
 		return nil, err
 	}
-	// 非法动作签名
-	if claims["act"] != "renew" {
-		return nil, gerror.New("claims act not correct.")
+	// 校验签发类型
+	if claims["ist"] != "renew" {
+		return nil, gerror.New("claims ist not correct.")
 	}
 	return s.Authorization(ctx, claims["sub"].(string), claims["isr"].([]string))
 }
@@ -117,8 +117,8 @@ func (s *sOauth) ValidAuthorization(r *ghttp.Request) (g.Map, error) {
 		return nil, err
 	}
 	// 非法动作签名
-	if claims["act"] != "issue" {
-		return nil, gerror.New("claims act not correct.")
+	if claims["ist"] != "issue" {
+		return nil, gerror.New("claims ist not correct.")
 	}
 
 	return claims, nil
