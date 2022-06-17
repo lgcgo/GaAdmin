@@ -14,10 +14,11 @@ import (
 )
 
 // 添加菜单
-func (s *sAuth) CreateMenu(ctx context.Context, in *model.AuthMenuCreateInput) (uint, error) {
+func (s *sAuth) CreateMenu(ctx context.Context, in *model.AuthMenuCreateInput) (*entity.AuthMenu, error) {
 	var (
 		err       error
 		available bool
+		ent       *entity.AuthMenu
 	)
 
 	// 检测父级
@@ -25,15 +26,15 @@ func (s *sAuth) CreateMenu(ctx context.Context, in *model.AuthMenuCreateInput) (
 		var parent *entity.AuthMenu
 		parent, err = s.GetMenu(ctx, in.ParentId)
 		if parent == nil {
-			return 0, gerror.Newf("parent is not exists: %d", in.ParentId)
+			return nil, gerror.Newf("parent is not exists: %d", in.ParentId)
 		}
 	}
 	// 标题防重
 	if available, err = s.IsMenuTitleAvailable(ctx, in.Title); err != nil {
-		return 0, err
+		return nil, err
 	}
 	if !available {
-		return 0, gerror.Newf("title is already exists: %s", in.Title)
+		return nil, gerror.Newf("title is already exists: %s", in.Title)
 	}
 
 	// 插入数据
@@ -43,16 +44,20 @@ func (s *sAuth) CreateMenu(ctx context.Context, in *model.AuthMenuCreateInput) (
 	)
 
 	if err = gconv.Struct(in, &data); err != nil {
-		return 0, err
+		return nil, err
 	}
 	if err = dao.AuthRule.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
 		insertId, err = dao.AuthMenu.Ctx(ctx).Data(data).InsertAndGetId()
 		return err
 	}); err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	return uint(insertId), nil
+	if ent, err = s.GetMenu(ctx, uint(insertId)); err != nil {
+		return nil, err
+	}
+
+	return ent, nil
 }
 
 // 获取菜单
@@ -73,8 +78,9 @@ func (s *sAuth) GetMenu(ctx context.Context, menuId uint) (*entity.AuthMenu, err
 }
 
 // 修改菜单
-func (s *sAuth) UpdateMenu(ctx context.Context, in *model.AuthMenuUpdateInput) error {
+func (s *sAuth) UpdateMenu(ctx context.Context, in *model.AuthMenuUpdateInput) (*entity.AuthMenu, error) {
 	var (
+		data      *do.AuthMenu
 		ent       *entity.AuthMenu
 		err       error
 		available bool
@@ -82,10 +88,10 @@ func (s *sAuth) UpdateMenu(ctx context.Context, in *model.AuthMenuUpdateInput) e
 
 	// 扫描数据
 	if ent, err = s.GetMenu(ctx, in.MenuId); err != nil {
-		return err
+		return nil, err
 	}
 	if ent == nil {
-		return gerror.Newf("menu is not exists: %d", in.MenuId)
+		return nil, gerror.Newf("menu is not exists: %d", in.MenuId)
 	}
 	// 检测父级
 	if in.ParentId > 0 {
@@ -95,35 +101,37 @@ func (s *sAuth) UpdateMenu(ctx context.Context, in *model.AuthMenuUpdateInput) e
 		)
 		parent, err = s.GetMenu(ctx, in.ParentId)
 		if parent == nil {
-			return gerror.Newf("parent is not exists: %d", in.ParentId)
+			return nil, gerror.Newf("parent is not exists: %d", in.ParentId)
 		}
 		for _, v := range ids {
 			if in.ParentId == v {
-				return gerror.Newf("parent can not be self or child: %d", in.ParentId)
+				return nil, gerror.Newf("parent can not be self or child: %d", in.ParentId)
 			}
 		}
 	}
 	// 标题防重
 	if available, err = s.IsMenuTitleAvailable(ctx, in.Title, []uint{ent.Id}...); err != nil {
-		return err
+		return nil, err
 	}
 	if !available {
-		return gerror.Newf("title is already exists: %s", in.Title)
+		return nil, gerror.Newf("title is already exists: %s", in.Title)
 	}
-
-	// 格式化更新
-	var data *do.AuthMenu
-
+	// 转换数据
 	if err = gconv.Struct(in, &data); err != nil {
-		return err
+		return nil, err
 	}
-
-	return dao.AuthMenu.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
+	// 更新实体
+	if err = dao.AuthMenu.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
 		_, err = dao.AuthMenu.Ctx(ctx).Where(do.AuthMenu{
 			Id: in.MenuId,
 		}).Data(data).Update()
 		return err
-	})
+	}); err != nil {
+		return nil, err
+	}
+	ent, _ = s.GetMenu(ctx, in.MenuId)
+
+	return ent, nil
 }
 
 // 删除菜单(硬删除)
@@ -141,7 +149,6 @@ func (s *sAuth) DeleteMenu(ctx context.Context, menuId uint) error {
 	if ent == nil {
 		return gerror.Newf("menu is not exists: %d", menuId)
 	}
-
 	if ids, err = s.GetMenuChildrenIds(ctx, menuId); err != nil {
 		return err
 	}

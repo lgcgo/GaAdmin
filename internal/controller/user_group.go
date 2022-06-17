@@ -26,25 +26,22 @@ func (c *cUserGroup) Create(ctx context.Context, req *v1.UserGroupCreateReq) (*v
 		groupId uint
 	)
 
-	// 格式化创建
+	// 转换参数
 	if err = gconv.Struct(req, &in); err != nil {
 		return nil, err
 	}
-	if groupId, err = ser.CreateGroup(ctx, in); err != nil {
-		return nil, err
-	}
-
-	// 获取实体
-	if ent, err = ser.GetGroup(ctx, groupId); err != nil {
+	// 创建实体
+	if ent, err = ser.CreateGroup(ctx, in); err != nil {
 		return nil, err
 	}
 	if ent == nil {
 		return nil, gerror.Newf("group is not exists: %d", groupId)
 	}
-	// 格式化响应
+	// 转换响应
 	if err = gconv.Struct(ent, &res); err != nil {
 		return nil, err
 	}
+
 	return res, err
 }
 
@@ -63,7 +60,7 @@ func (c *cUserGroup) Get(ctx context.Context, req *v1.UserGroupGetReq) (*v1.User
 	if ent == nil {
 		return nil, gerror.Newf("group not exists: %d", req.GroupId)
 	}
-	// 格式化响应
+	// 转换响应
 	if err = gconv.Struct(ent, &res); err != nil {
 		return nil, err
 	}
@@ -80,24 +77,19 @@ func (c *cUserGroup) Update(ctx context.Context, req *v1.UserGroupUpdateReq) (*v
 		ent *entity.UserGroup
 	)
 
-	// 格式化更新
+	// 转换请求
 	if err = gconv.Struct(req, &in); err != nil {
 		return nil, err
 	}
-	if err = ser.UpdateGroup(ctx, in); err != nil {
+	if ent, err = ser.UpdateGroup(ctx, in); err != nil {
 		return nil, err
 	}
-
-	// 获取实体
-	if ent, err = ser.GetGroup(ctx, req.GroupId); err != nil {
-		return nil, err
-	}
-
-	// 格式化响应
+	// 转换响应
 	if err = gconv.Struct(ent, &res); err != nil {
 		return nil, err
 	}
-	return res, err
+
+	return res, nil
 }
 
 // 删除分组
@@ -123,12 +115,11 @@ func (c *cUserGroup) Tree(ctx context.Context, req *v1.UserGroupTreeReq) (*v1.Us
 		out *model.TreeDataOutput
 	)
 
-	// 获取分页(全部数据)
+	// 获取树数据
 	if out, err = service.User().GetGroupTreeData(ctx); err != nil {
 		return nil, err
 	}
-
-	// 格式化响应
+	// 转换响应
 	if err = gconv.Struct(out, &res); err != nil {
 		return nil, err
 	}

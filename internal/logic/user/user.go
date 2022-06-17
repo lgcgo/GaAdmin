@@ -32,26 +32,28 @@ func New() *sUser {
 // - 服务层保证至少一种登录方式
 // - 账号|手机号|邮箱其中一个必填
 // - 当存在账号，则密码必填
-func (s *sUser) CreateUser(ctx context.Context, in *model.UserCreateInput) (uint, error) {
+func (s *sUser) CreateUser(ctx context.Context, in *model.UserCreateInput) (*entity.User, error) {
 	var (
+		data      *do.User
+		ent       *entity.User
 		available bool
 		err       error
 	)
 
 	// 使 账号|手机号|邮箱 其中一个必填
 	if len(in.Account) == 0 && len(in.Email) == 0 && len(in.Mobile) == 0 {
-		return 0, gerror.New("missing passport field")
+		return nil, gerror.New("missing passport field")
 	}
 	// 账号防重，如果有
 	if len(in.Account) > 0 {
 		if available, err = s.IsUserAccountAvailable(ctx, in.Account); err != nil {
-			return 0, err
+			return nil, err
 		}
 		if !available {
-			return 0, gerror.Newf("account is already exists: %s", in.Account)
+			return nil, gerror.Newf("account is already exists: %s", in.Account)
 		}
 		if len(in.Password) == 0 {
-			return 0, gerror.New("password cannot be empty")
+			return nil, gerror.New("password cannot be empty")
 		}
 	} else {
 		// 随机8位英文，重复由数据库抛出异常
@@ -60,19 +62,19 @@ func (s *sUser) CreateUser(ctx context.Context, in *model.UserCreateInput) (uint
 	// 手机号防重，如果有
 	if len(in.Mobile) > 0 {
 		if available, err = s.IsUserMobileAvailable(ctx, in.Mobile); err != nil {
-			return 0, err
+			return nil, err
 		}
 		if !available {
-			return 0, gerror.Newf("mobile is already exists: %s", in.Mobile)
+			return nil, gerror.Newf("mobile is already exists: %s", in.Mobile)
 		}
 	}
 	// Email防重，如果有
 	if len(in.Email) > 0 {
 		if available, err = s.IsUserEmailAvailable(ctx, in.Email); err != nil {
-			return 0, err
+			return nil, err
 		}
 		if !available {
-			return 0, gerror.Newf("email is already exists: %s", in.Email)
+			return nil, gerror.Newf("email is already exists: %s", in.Email)
 		}
 	}
 	// 检测用户组IDs
@@ -81,7 +83,7 @@ func (s *sUser) CreateUser(ctx context.Context, in *model.UserCreateInput) (uint
 	// 	in.GroupIds = append(in.GroupIds, defaultGroupId)
 	// }
 	if _, err = s.CheckGroupIds(ctx, in.GroupIds); err != nil {
-		return 0, err
+		return nil, err
 	}
 	// 支持无密码创建
 	if len(in.Password) == 0 {
@@ -90,25 +92,26 @@ func (s *sUser) CreateUser(ctx context.Context, in *model.UserCreateInput) (uint
 
 	var (
 		salt     = grand.Letters(4)
-		data     *do.User
 		insertId int64
 	)
 
-	// 格式化写入
+	// 转换数据
 	if err = gconv.Struct(in, &data); err != nil {
-		return 0, err
+		return nil, err
 	}
 	data.Uuid = guid.S()
 	data.Salt = salt
 	data.Password = s.MustEncryptPasword(in.Password, salt)
+	// 创建实体
 	if err = dao.User.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
 		insertId, err = dao.User.Ctx(ctx).Data(data).InsertAndGetId()
 		return err
 	}); err != nil {
-		return 0, err
+		return nil, err
 	}
+	ent, _ = s.GetUser(ctx, uint(insertId))
 
-	return uint(insertId), nil
+	return ent, nil
 }
 
 // 获取用户
@@ -140,8 +143,9 @@ func (s *sUser) GetUserByUuid(ctx context.Context, uuid string) (*entity.User, e
 }
 
 // 修改用户
-func (s *sUser) UpdateUser(ctx context.Context, in *model.UserUpdateInput) error {
+func (s *sUser) UpdateUser(ctx context.Context, in *model.UserUpdateInput) (*entity.User, error) {
 	var (
+		data      *do.User
 		ent       *entity.User
 		err       error
 		available bool
@@ -149,47 +153,44 @@ func (s *sUser) UpdateUser(ctx context.Context, in *model.UserUpdateInput) error
 
 	// 扫描数据
 	if ent, err = s.GetUser(ctx, in.UserId); err != nil {
-		return err
+		return nil, err
 	}
 	// 账户防重，如果有
 	if len(in.Account) > 0 {
 		if available, err = s.IsUserAccountAvailable(ctx, in.Account, []uint{ent.Id}...); err != nil {
-			return err
+			return nil, err
 		}
 		if !available {
-			return gerror.Newf("account is already exists: %s", in.Account)
+			return nil, gerror.Newf("account is already exists: %s", in.Account)
 		}
 	}
 	// 手机号防重，如果有
 	if len(in.Mobile) > 0 {
 		if available, err = s.IsUserMobileAvailable(ctx, in.Mobile, []uint{ent.Id}...); err != nil {
-			return err
+			return nil, err
 		}
 		if !available {
-			return gerror.Newf("mobile is already exists: %s", in.Mobile)
+			return nil, gerror.Newf("mobile is already exists: %s", in.Mobile)
 		}
 	}
 	// 邮箱防重，如果有
 	if len(in.Account) > 0 {
 		if available, err = s.IsUserEmailAvailable(ctx, in.Email, []uint{ent.Id}...); err != nil {
-			return err
+			return nil, err
 		}
 		if !available {
-			return gerror.Newf("email is already exists: %s", in.Email)
+			return nil, gerror.Newf("email is already exists: %s", in.Email)
 		}
 	}
 	// 检测用户组IDs，如果有
 	if len(in.GroupIds) > 0 {
 		if _, err = s.CheckGroupIds(ctx, in.GroupIds); err != nil {
-			return err
+			return nil, err
 		}
 	}
-
-	// 格式化更新
-	var data *do.User
-
+	// 转换数据
 	if err = gconv.Struct(in, &data); err != nil {
-		return err
+		return nil, err
 	}
 	// 支持密码为空时不更新
 	if len(in.Password) > 0 {
@@ -199,11 +200,16 @@ func (s *sUser) UpdateUser(ctx context.Context, in *model.UserUpdateInput) error
 	} else {
 		data.Password = nil
 	}
-
-	return dao.User.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
+	// 更新实体
+	if err = dao.User.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
 		_, err = dao.User.Ctx(ctx).Where(dao.User.Columns().Id, in.UserId).Data(data).Update()
 		return err
-	})
+	}); err != nil {
+		return nil, err
+	}
+	ent, _ = s.GetUser(ctx, in.UserId)
+
+	return ent, nil
 }
 
 // 删除用户

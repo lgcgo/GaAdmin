@@ -17,35 +17,30 @@ var UserSign = cUserSign{}
 // 员工注册并授权(前台用户注册)
 func (c *cUserSign) SignUp(ctx context.Context, req *v1.UserSignUpReq) (*v1.UserSignUpRes, error) {
 	var (
-		res    *v1.UserSignUpRes
-		err    error
-		in     *model.UserCreateInput
-		out    *model.TokenOutput
-		ent    *entity.User
-		userId uint
+		res *v1.UserSignUpRes
+		err error
+		in  *model.UserCreateInput
+		out *model.TokenOutput
+		ent *entity.User
 	)
 
 	// 校验验证码
 	if err = service.Sms().Verify(ctx, req.Captcha, "register"); err != nil {
 		return nil, err
 	}
-	// 格式化创建
+	// 转换参数
 	if err = gconv.Struct(req, &in); err != nil {
 		return nil, err
 	}
 	// 创建实体
-	if userId, err = service.User().CreateUser(ctx, in); err != nil {
-		return nil, err
-	}
-	// 获取实体
-	if ent, err = service.User().GetUser(ctx, userId); err != nil {
+	if ent, err = service.User().CreateUser(ctx, in); err != nil {
 		return nil, err
 	}
 	// 生成授权Token
 	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, []string{"root"}); err != nil {
 		return nil, err
 	}
-	// 格式化响应
+	// 转换响应
 	if err = gconv.Struct(out, &res); err != nil {
 		return nil, err
 	}
@@ -63,7 +58,7 @@ func (c *cUserSign) SignPassport(ctx context.Context, req *v1.UserSignPassportRe
 		ent *entity.User
 	)
 
-	// 格式化登录
+	// 转换参数
 	if err = gconv.Struct(req, &in); err != nil {
 		return nil, err
 	}
@@ -75,7 +70,7 @@ func (c *cUserSign) SignPassport(ctx context.Context, req *v1.UserSignPassportRe
 	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, []string{"root"}); err != nil {
 		return nil, err
 	}
-	// 格式化响应
+	// 转换响应
 	if err = gconv.Struct(out, &res); err != nil {
 		return nil, err
 	}
@@ -92,7 +87,7 @@ func (c *cUserSign) SignMobile(ctx context.Context, req *v1.UserSignMobileReq) (
 		out *model.TokenOutput
 		ent *entity.User
 	)
-	// 格式化登录
+	// 转换请求
 	if err = gconv.Struct(req, &in); err != nil {
 		return nil, err
 	}
@@ -104,7 +99,7 @@ func (c *cUserSign) SignMobile(ctx context.Context, req *v1.UserSignMobileReq) (
 	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, []string{"root"}); err != nil {
 		return nil, err
 	}
-	// 格式化响应
+	// 转换响应
 	if err = gconv.Struct(out, &res); err != nil {
 		return nil, err
 	}
@@ -123,7 +118,7 @@ func (c *cUserSign) Refresh(ctx context.Context, req *v1.UserSignRefreshReq) (*v
 		return nil, err
 	}
 
-	// 格式化返回
+	// 转换响应
 	if err = gconv.Struct(out, &res); err != nil {
 		return nil, err
 	}

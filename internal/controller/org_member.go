@@ -18,32 +18,27 @@ var OrgMember = cOrgMember{}
 // 创建成员
 func (c *cOrgMember) Create(ctx context.Context, req *v1.OrgMemberCreateReq) (*v1.OrgMemberCreateRes, error) {
 	var (
-		ser      = service.Org()
-		res      *v1.OrgMemberCreateRes
-		err      error
-		in       *model.OrgMemberCreateInput
-		memberId uint
-		ent      *entity.OrgMember
+		ser = service.Org()
+		res *v1.OrgMemberCreateRes
+		err error
+		in  *model.OrgMemberCreateInput
+		ent *entity.OrgMember
 	)
 
-	// 格式化创建
+	// 转换参数
 	if err = gconv.Struct(req, &in); err != nil {
 		return nil, err
 	}
-	if memberId, err = ser.CreateMember(ctx, in); err != nil {
+	// 创建实体
+	if ent, err = ser.CreateMember(ctx, in); err != nil {
 		return nil, err
 	}
-
-	// 获取实体
-	if ent, err = ser.GetMember(ctx, memberId); err != nil {
-		return nil, err
-	}
-
-	// 格式化响应
+	// 转换响应
 	if err = gconv.Struct(ent, &res); err != nil {
 		return nil, err
 	}
-	return res, err
+
+	return res, nil
 }
 
 // 获取成员
@@ -61,11 +56,12 @@ func (c *cOrgMember) Get(ctx context.Context, req *v1.OrgMemberGetReq) (*v1.OrgM
 	if ent == nil {
 		return nil, gerror.Newf("member is not exist: %d", req.MemberId)
 	}
-	// 格式化响应
+	// 转换请求
 	if err = gconv.Struct(ent, &res); err != nil {
 		return nil, err
 	}
-	return res, err
+
+	return res, nil
 }
 
 // 修改
@@ -78,24 +74,20 @@ func (c *cOrgMember) Update(ctx context.Context, req *v1.OrgMemberUpdateReq) (*v
 		ent *entity.OrgMember
 	)
 
-	// 格式化更新
+	// 转换请求
 	if err = gconv.Struct(req, &in); err != nil {
 		return nil, err
 	}
-	if err = ser.UpdateMember(ctx, in); err != nil {
+	// 更新实体
+	if ent, err = ser.UpdateMember(ctx, in); err != nil {
 		return nil, err
 	}
-
-	// 获取实体
-	if ent, err = ser.GetMember(ctx, req.MemberId); err != nil {
-		return nil, err
-	}
-
-	// 格式化响应
+	// 转换响应
 	if err = gconv.Struct(ent, &res); err != nil {
 		return nil, err
 	}
-	return res, err
+
+	return res, nil
 }
 
 // 删除
@@ -122,17 +114,18 @@ func (c *cOrgMember) List(ctx context.Context, req *v1.OrgMemberListReq) (*v1.Or
 		out *model.OrgMemberPageOutput
 	)
 
-	// 格式化获取分页
+	// 转换请求
 	if err = gconv.Struct(req, &in); err != nil {
 		return nil, err
 	}
+	// 获取分页
 	if out, err = service.Org().GetMemberPage(ctx, in); err != nil {
 		return nil, err
 	}
-
-	// 格式化返回
+	// 转换响应
 	if err = gconv.Struct(out, &res); err != nil {
 		return nil, err
 	}
+
 	return res, nil
 }

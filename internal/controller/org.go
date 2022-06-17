@@ -18,32 +18,27 @@ var Org = &cOrg{}
 // 创建
 func (c *cOrg) Create(ctx context.Context, req *v1.OrgCreateReq) (*v1.OrgCreateRes, error) {
 	var (
-		ser   = service.Org()
-		res   *v1.OrgCreateRes
-		err   error
-		in    *model.OrgCreateInput
-		ent   *entity.Org
-		orgId uint
+		ser = service.Org()
+		res *v1.OrgCreateRes
+		err error
+		in  *model.OrgCreateInput
+		ent *entity.Org
 	)
 
-	// 格式化创建
+	// 转换请求
 	if err = gconv.Struct(req, &in); err != nil {
 		return nil, err
 	}
-	if orgId, err = ser.CreateOrg(ctx, in); err != nil {
+	// 创建实体
+	if ent, err = ser.CreateOrg(ctx, in); err != nil {
 		return nil, err
 	}
-
-	// 获取实体
-	if ent, err = ser.GetOrg(ctx, orgId); err != nil {
-		return nil, err
-	}
-
-	// 格式化响应
+	// 转换响应
 	if err = gconv.Struct(ent, &res); err != nil {
 		return nil, err
 	}
-	return res, err
+
+	return res, nil
 }
 
 // 获取
@@ -61,11 +56,12 @@ func (c *cOrg) Get(ctx context.Context, req *v1.OrgGetReq) (*v1.OrgGetRes, error
 	if ent == nil {
 		return nil, gerror.Newf("org is not exist: %d", req.OrgId)
 	}
-	// 格式化响应
+	// 转换响应
 	if err = gconv.Struct(ent, &res); err != nil {
 		return nil, err
 	}
-	return res, err
+
+	return res, nil
 }
 
 // 修改
@@ -78,24 +74,20 @@ func (c *cOrg) Update(ctx context.Context, req *v1.OrgUpdateReq) (*v1.OrgUpdateR
 		ent *entity.Org
 	)
 
-	// 格式化更新
+	// 转换请求
 	if err = gconv.Struct(req, &in); err != nil {
 		return nil, err
 	}
-	if err = ser.UpdateOrg(ctx, in); err != nil {
+	// 更新实体
+	if ent, err = ser.UpdateOrg(ctx, in); err != nil {
 		return nil, err
 	}
-
-	// 获取实体
-	if ent, err = ser.GetOrg(ctx, req.OrgId); err != nil {
-		return nil, err
-	}
-
-	// 格式化响应
+	// 转换响应
 	if err = gconv.Struct(ent, &res); err != nil {
 		return nil, err
 	}
-	return res, err
+
+	return res, nil
 }
 
 // 删除
@@ -120,17 +112,18 @@ func (c *cOrg) List(ctx context.Context, req *v1.OrgListReq) (*v1.OrgListRes, er
 		out *model.OrgPageOutput
 	)
 
-	// 格式化获取分页
+	// 转换请求
 	if err = gconv.Struct(req, &in); err != nil {
 		return nil, err
 	}
+	// 获取分页
 	if out, err = service.Org().GetOrgPage(ctx, in); err != nil {
 		return nil, err
 	}
-
-	// 格式化返回
+	// 转换响应
 	if err = gconv.Struct(out, &res); err != nil {
 		return nil, err
 	}
-	return res, err
+
+	return res, nil
 }

@@ -17,32 +17,27 @@ var User = cUser{}
 // 创建用户
 func (c *cUser) Create(ctx context.Context, req *v1.UserCreateReq) (*v1.UserCreateRes, error) {
 	var (
-		ser    = service.User()
-		res    *v1.UserCreateRes
-		err    error
-		in     *model.UserCreateInput
-		ent    *entity.User
-		userId uint
+		ser = service.User()
+		res *v1.UserCreateRes
+		err error
+		in  *model.UserCreateInput
+		ent *entity.User
 	)
 
-	// 格式化创建
+	// 转换请求
 	if err = gconv.Struct(req, &in); err != nil {
 		return nil, err
 	}
-	if userId, err = ser.CreateUser(ctx, in); err != nil {
+	// 创建实体
+	if ent, err = ser.CreateUser(ctx, in); err != nil {
 		return nil, err
 	}
-
-	// 获取实体
-	if ent, err = ser.GetUser(ctx, userId); err != nil {
-		return nil, err
-	}
-
-	// 格式化响应
+	// 转换响应
 	if err = gconv.Struct(ent, &res); err != nil {
 		return nil, err
 	}
-	return res, err
+
+	return res, nil
 }
 
 // 获取用户
@@ -57,12 +52,12 @@ func (c *cUser) Get(ctx context.Context, req *v1.UserGetReq) (*v1.UserGetRes, er
 	if ent, err = service.User().GetUser(ctx, req.UserId); err != nil {
 		return nil, err
 	}
-
-	// 格式化响应
+	// 转换响应
 	if err = gconv.Struct(ent, &res); err != nil {
 		return nil, err
 	}
-	return res, err
+
+	return res, nil
 }
 
 // 修改用户
@@ -75,24 +70,20 @@ func (c *cUser) Update(ctx context.Context, req *v1.UserUpdateReq) (*v1.UserUpda
 		ent *entity.User
 	)
 
-	// 格式化更新
+	// 转换请求
 	if err = gconv.Struct(req, &in); err != nil {
 		return nil, err
 	}
-	if err = ser.UpdateUser(ctx, in); err != nil {
+	// 更新实体
+	if ent, err = ser.UpdateUser(ctx, in); err != nil {
 		return nil, err
 	}
-
-	// 获取实体
-	if ent, err = ser.GetUser(ctx, req.UserId); err != nil {
-		return nil, err
-	}
-
-	// 格式化响应
+	// 转换响应
 	if err = gconv.Struct(ent, &res); err != nil {
 		return nil, err
 	}
-	return res, err
+
+	return res, nil
 }
 
 // 删除用户
@@ -103,9 +94,11 @@ func (c *cUser) Delete(ctx context.Context, req *v1.UserDeleteReq) (*v1.UserDele
 	)
 
 	// 删除实体
-	err = service.User().DeleteUser(ctx, req.UserId)
+	if err = service.User().DeleteUser(ctx, req.UserId); err != nil {
+		return nil, err
+	}
 
-	return res, err
+	return res, nil
 }
 
 // 获取员工列表
@@ -117,17 +110,18 @@ func (c *cUser) List(ctx context.Context, req *v1.UserListReq) (*v1.UserListRes,
 		out *model.UserPageOutput
 	)
 
-	// 格式化获取分页
+	// 转换请求
 	if err = gconv.Struct(req, &in); err != nil {
 		return nil, err
 	}
+	// 获取分页
 	if out, err = service.User().GetUserPage(ctx, in); err != nil {
 		return nil, err
 	}
-
-	// 格式化返回
+	// 转换响应
 	if err = gconv.Struct(out, &res); err != nil {
 		return nil, err
 	}
-	return res, err
+
+	return res, nil
 }

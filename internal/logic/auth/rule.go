@@ -15,10 +15,11 @@ import (
 )
 
 // 添加规则
-func (s *sAuth) CreateRule(ctx context.Context, in *model.AuthRuleCreateInput) (uint, error) {
+func (s *sAuth) CreateRule(ctx context.Context, in *model.AuthRuleCreateInput) (*entity.AuthRule, error) {
 	var (
 		available bool
 		err       error
+		ent       *entity.AuthRule
 	)
 
 	// 检测菜单
@@ -26,15 +27,15 @@ func (s *sAuth) CreateRule(ctx context.Context, in *model.AuthRuleCreateInput) (
 		var parent *entity.AuthMenu
 		parent, err = s.GetMenu(ctx, in.MenuId)
 		if parent == nil {
-			return 0, gerror.Newf("menu is not exists: %d", in.MenuId)
+			return nil, gerror.Newf("menu is not exists: %d", in.MenuId)
 		}
 	}
 	// 路径防重
 	if available, err = s.IsRulePathMethodAvailable(ctx, in.Path, in.Method); err != nil {
-		return 0, err
+		return nil, err
 	}
 	if !available {
-		return 0, gerror.Newf("path is already exists: %s %s", in.Path, in.Method)
+		return nil, gerror.Newf("path is already exists: %s %s", in.Path, in.Method)
 	}
 	// 插入数据
 	var (
@@ -42,14 +43,17 @@ func (s *sAuth) CreateRule(ctx context.Context, in *model.AuthRuleCreateInput) (
 		insertId int64
 	)
 	if err = gconv.Struct(in, &data); err != nil {
-		return 0, err
+		return nil, err
 	}
 	err = dao.AuthRule.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
 		insertId, err = dao.AuthRule.Ctx(ctx).Data(data).InsertAndGetId()
 		return err
 	})
+	if ent, err = s.GetRule(ctx, uint(insertId)); err != nil {
+		return nil, err
+	}
 
-	return uint(insertId), err
+	return ent, err
 }
 
 // 获取规则
@@ -70,8 +74,9 @@ func (s *sAuth) GetRule(ctx context.Context, nodeId uint) (*entity.AuthRule, err
 }
 
 // 修改规则
-func (s *sAuth) UpdateRule(ctx context.Context, in *model.AuthRuleUpdateInput) error {
+func (s *sAuth) UpdateRule(ctx context.Context, in *model.AuthRuleUpdateInput) (*entity.AuthRule, error) {
 	var (
+		data      *do.AuthRule
 		ent       *entity.AuthRule
 		err       error
 		available bool
@@ -79,45 +84,44 @@ func (s *sAuth) UpdateRule(ctx context.Context, in *model.AuthRuleUpdateInput) e
 
 	// 扫描数据
 	if ent, err = s.GetRule(ctx, in.RuleId); err != nil {
-		return err
+		return nil, err
 	}
 	if ent == nil {
-		return gerror.Newf("rule is not exists: %d", in.RuleId)
+		return nil, gerror.Newf("rule is not exists: %d", in.RuleId)
 	}
 	// 检测菜单
 	if in.MenuId > 0 {
 		var parent *entity.AuthMenu
 		parent, err = s.GetMenu(ctx, in.MenuId)
 		if parent == nil {
-			return gerror.Newf("menu is not exists: %d", in.MenuId)
+			return nil, gerror.Newf("menu is not exists: %d", in.MenuId)
 		}
 	}
 	// 路径防重
 	if available, err = s.IsRulePathMethodAvailable(ctx, in.Path, in.Method, []uint{ent.Id}...); err != nil {
-		return err
+		return nil, err
 	}
 	if !available {
-		return gerror.Newf("path is already exists: %s %s", in.Path, in.Method)
+		return nil, gerror.Newf("path is already exists: %s %s", in.Path, in.Method)
 	}
-
-	// 格式化更新
-	var data *do.AuthRule
+	// 转换数据
 	if err = gconv.Struct(in, &data); err != nil {
-		return err
+		return nil, err
 	}
-
+	// 更新实体
 	if err = dao.AuthRule.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
 		_, err = dao.AuthRule.Ctx(ctx).Where(do.AuthRule{
 			Id: in.RuleId,
 		}).Data(data).Update()
 		return err
 	}); err != nil {
-		return err
+		return nil, err
 	}
 	// 更新授权政策
 	service.Oauth().SavePolicy(ctx)
 
-	return nil
+	ent, _ = s.GetRule(ctx, in.RuleId)
+	return ent, nil
 }
 
 // 删除规则(硬删除)

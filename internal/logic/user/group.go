@@ -17,10 +17,13 @@ import (
 )
 
 // 创建分组
-func (s *sUser) CreateGroup(ctx context.Context, in *model.UserGroupCreateInput) (uint, error) {
+func (s *sUser) CreateGroup(ctx context.Context, in *model.UserGroupCreateInput) (*entity.UserGroup, error) {
 	var (
-		available bool
+		data      *do.UserGroup
+		ent       *entity.UserGroup
 		err       error
+		available bool
+		insertId  int64
 	)
 
 	// 检测父级
@@ -28,34 +31,33 @@ func (s *sUser) CreateGroup(ctx context.Context, in *model.UserGroupCreateInput)
 		var parent *entity.UserGroup
 		parent, err = s.GetGroup(ctx, in.ParentId)
 		if parent == nil {
-			return 0, gerror.Newf("parent is not exists: %d", in.ParentId)
+			return nil, gerror.Newf("parent is not exists: %d", in.ParentId)
 		}
 	}
 	// 路径防重
 	if available, err = s.IsGroupNameAvailable(ctx, in.Name); err != nil {
-		return 0, err
+		return nil, err
 	}
 	if !available {
-		return 0, gerror.Newf("name is already exists: %s", in.Name)
+		return nil, gerror.Newf("name is already exists: %s", in.Name)
 	}
-	// 插入数据
-	var (
-		data     *do.UserGroup
-		insertId int64
-	)
+	// 转换数据
 	if err = gconv.Struct(in, &data); err != nil {
-		return 0, err
+		return nil, err
 	}
+	// 创建实体
 	if err = dao.UserGroup.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
 		insertId, err = dao.UserGroup.Ctx(ctx).Data(data).InsertAndGetId()
 		return err
 	}); err != nil {
-		return 0, err
+		return nil, err
 	}
 	// 更新授权政策
 	service.Oauth().SavePolicy(ctx)
+	// 获取实体
+	ent, _ = s.GetGroup(ctx, uint(insertId))
 
-	return uint(insertId), nil
+	return ent, nil
 }
 
 // 获取组织
@@ -76,8 +78,9 @@ func (s *sUser) GetGroup(ctx context.Context, groupId uint) (*entity.UserGroup, 
 }
 
 // 修改分组
-func (s *sUser) UpdateGroup(ctx context.Context, in *model.UserGroupUpdateInput) error {
+func (s *sUser) UpdateGroup(ctx context.Context, in *model.UserGroupUpdateInput) (*entity.UserGroup, error) {
 	var (
+		data      *do.UserGroup
 		ent       *entity.UserGroup
 		err       error
 		available bool
@@ -85,10 +88,10 @@ func (s *sUser) UpdateGroup(ctx context.Context, in *model.UserGroupUpdateInput)
 
 	// 扫描数据
 	if ent, err = s.GetGroup(ctx, in.GroupId); err != nil {
-		return err
+		return nil, err
 	}
 	if ent == nil {
-		return gerror.Newf("group is not exists: %d", in.GroupId)
+		return nil, gerror.Newf("group is not exists: %d", in.GroupId)
 	}
 	// 检测父级
 	if in.ParentId > 0 {
@@ -98,41 +101,43 @@ func (s *sUser) UpdateGroup(ctx context.Context, in *model.UserGroupUpdateInput)
 		)
 		parent, err = s.GetGroup(ctx, in.ParentId)
 		if parent == nil {
-			return gerror.Newf("parent is not exists: %d", in.ParentId)
+			return nil, gerror.Newf("parent is not exists: %d", in.ParentId)
 		}
 		if ids, err = s.GetGroupChildrenIDs(ctx, in.GroupId); err != nil {
-			return err
+			return nil, err
 		}
 		for _, v := range ids {
 			if in.ParentId == v {
-				return gerror.Newf("parent can not be self or child: %d", in.ParentId)
+				return nil, gerror.Newf("parent can not be self or child: %d", in.ParentId)
 			}
 		}
 	}
 	// 名称防重
 	if available, err = s.IsGroupNameAvailable(ctx, in.Name, []uint{ent.Id}...); err != nil {
-		return err
+		return nil, err
 	}
 	if !available {
-		return gerror.Newf("name is already exists: %s", in.Name)
+		return nil, gerror.Newf("name is already exists: %s", in.Name)
 	}
-	// 格式化更新
-	var data *do.UserGroup
+	// 转换数据
 	if err = gconv.Struct(in, &data); err != nil {
-		return err
+		return nil, err
 	}
+	// 更新实体
 	if err = dao.UserGroup.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
 		_, err = dao.UserGroup.Ctx(ctx).Where(do.UserGroup{
 			Id: in.GroupId,
 		}).Data(data).Update()
 		return err
 	}); err != nil {
-		return err
+		return nil, err
 	}
 	// 更新授权政策
 	service.Oauth().SavePolicy(ctx)
+	// 获取实体
+	ent, _ = s.GetGroup(ctx, in.GroupId)
 
-	return nil
+	return ent, nil
 }
 
 // 删除分组(硬删除)
@@ -150,12 +155,11 @@ func (s *sUser) DeleteGroup(ctx context.Context, groupId uint) error {
 	if ent == nil {
 		return gerror.Newf("group is not exists: %d", groupId)
 	}
-
+	// 获取子ID集
 	if ids, err = s.GetGroupChildrenIDs(ctx, groupId); err != nil {
 		return err
 	}
-
-	// 删除数据
+	// 删除实体
 	if err = dao.UserGroup.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
 		_, err = dao.UserGroup.Ctx(ctx).WhereIn("id", ids).Delete()
 		return err
@@ -198,6 +202,7 @@ func (s *sUser) GetGroupTreeData(ctx context.Context) (*model.TreeDataOutput, er
 		TreeData: t.GetTreeData(),
 		Total:    uint(t.CountTreeData()),
 	}
+
 	return out, nil
 }
 
@@ -279,53 +284,6 @@ func (s *sUser) GetGroupChildrenIDs(ctx context.Context, groupId uint) ([]uint, 
 	}
 
 	return ids, nil
-}
-
-// 设置分组权限
-func (s *sUser) SetupGroupAccess(ctx context.Context, groupId uint, auth_rule_ids []uint) error {
-	var (
-		err   error
-		group *entity.UserGroup
-	)
-
-	// 检测分组
-	if group, err = s.GetGroup(ctx, groupId); err != nil {
-		return err
-	}
-	if group == nil {
-		return gerror.Newf("group is not exists: %d", groupId)
-	}
-	// 检测权限ID集
-	// 待补充...
-
-	var (
-		data []*do.UserGroupAccess
-	)
-
-	// 组装新增数据
-	for _, v := range auth_rule_ids {
-		data = append(data, &do.UserGroupAccess{
-			GroupId:    groupId,
-			AuthRuleId: v,
-		})
-	}
-	if err = dao.UserGroupAccess.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
-		if _, err = dao.UserGroupAccess.Ctx(ctx).Where(do.UserGroupAccess{
-			GroupId: groupId,
-		}).Delete(); err != nil {
-			return err
-		}
-		if _, err = dao.UserGroupAccess.Ctx(ctx).Data(data).Insert(); err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
-		return err
-	}
-	// 更新授权政策
-	service.Oauth().SavePolicy(ctx)
-
-	return nil
 }
 
 // 检测分组名称

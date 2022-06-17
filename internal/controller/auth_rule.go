@@ -26,24 +26,24 @@ func (c *cAuthRule) Create(ctx context.Context, req *v1.AuthRuleCreateReq) (*v1.
 		ruleId uint
 	)
 
-	// 格式化创建
+	// 转换参数
 	if err = gconv.Struct(req, &in); err != nil {
 		return nil, err
 	}
-	if ruleId, err = ser.CreateRule(ctx, in); err != nil {
+	// 创建实体
+	if ent, err = ser.CreateRule(ctx, in); err != nil {
 		return nil, err
 	}
-
 	// 获取实体
 	if ent, err = ser.GetRule(ctx, ruleId); err != nil {
 		return nil, err
 	}
-
-	// 格式化响应
+	// 转换响应
 	if err = gconv.Struct(ent, &res); err != nil {
 		return nil, err
 	}
-	return res, err
+
+	return res, nil
 }
 
 // 获取权限节点
@@ -58,16 +58,15 @@ func (c *cAuthRule) Get(ctx context.Context, req *v1.AuthRuleGetReq) (*v1.AuthRu
 	if ent, err = service.Auth().GetRule(ctx, req.RuleId); err != nil {
 		return nil, err
 	}
-
 	if ent == nil {
 		return nil, gerror.New("rule is not exists")
 	}
-
-	// 格式化响应
+	// 转换响应
 	if err = gconv.Struct(ent, &res); err != nil {
 		return nil, err
 	}
-	return res, err
+
+	return res, nil
 }
 
 // 修改权限节点
@@ -80,26 +79,20 @@ func (c *cAuthRule) Update(ctx context.Context, req *v1.AuthRuleUpdateReq) (*v1.
 		ent *entity.AuthRule
 	)
 
-	// 更新实体
+	// 转换参数
 	if err = gconv.Struct(req, &in); err != nil {
 		return nil, err
 	}
-	if err = ser.UpdateRule(ctx, in); err != nil {
+	// 更新实体
+	if ent, err = ser.UpdateRule(ctx, in); err != nil {
 		return nil, err
 	}
-	// 获取实体
-	if ent, err = ser.GetRule(ctx, req.RuleId); err != nil {
-		return nil, err
-	}
-	if ent == nil {
-		return nil, gerror.New("menu is not exists")
-	}
-	// 格式化响应
+	// 转换响应
 	if err = gconv.Struct(ent, &res); err != nil {
 		return nil, err
 	}
 
-	return res, err
+	return res, nil
 }
 
 // 删除权限菜单

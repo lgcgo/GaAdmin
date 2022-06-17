@@ -12,16 +12,16 @@ import (
 
 type IOrg interface {
 	GetMemberByUuid(ctx context.Context, uuid string) (*entity.OrgMember, error)
-	CreateMember(ctx context.Context, in *model.OrgMemberCreateInput) (uint, error)
+	CreateMember(ctx context.Context, in *model.OrgMemberCreateInput) (*entity.OrgMember, error)
 	GetMember(ctx context.Context, memberId uint) (*entity.OrgMember, error)
-	UpdateMember(ctx context.Context, in *model.OrgMemberUpdateInput) error
+	UpdateMember(ctx context.Context, in *model.OrgMemberUpdateInput) (*entity.OrgMember, error)
 	DeleteMember(ctx context.Context, id uint) error
 	GetMemberPage(ctx context.Context, in *model.Page) (*model.OrgMemberPageOutput, error)
 	IsMemberUuidAvailable(ctx context.Context, orgId uint, uuid string, notIds ...uint) (bool, error)
 	IsMemberNoAvailable(ctx context.Context, orgId uint, no string, notIds ...uint) (bool, error)
-	CreateOrg(ctx context.Context, in *model.OrgCreateInput) (uint, error)
+	CreateOrg(ctx context.Context, in *model.OrgCreateInput) (*entity.Org, error)
 	GetOrg(ctx context.Context, orgId uint) (*entity.Org, error)
-	UpdateOrg(ctx context.Context, in *model.OrgUpdateInput) error
+	UpdateOrg(ctx context.Context, in *model.OrgUpdateInput) (*entity.Org, error)
 	DeleteOrg(ctx context.Context, id uint) error
 	GetOrgPage(ctx context.Context, in *model.Page) (*model.OrgPageOutput, error)
 	IsNameAvailable(ctx context.Context, name string, notIds ...uint) (bool, error)

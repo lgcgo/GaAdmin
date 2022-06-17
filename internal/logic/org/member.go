@@ -25,27 +25,28 @@ func (s *sOrg) GetMemberByUuid(ctx context.Context, uuid string) (*entity.OrgMem
 }
 
 // 创建成员
-func (s *sOrg) CreateMember(ctx context.Context, in *model.OrgMemberCreateInput) (uint, error) {
+func (s *sOrg) CreateMember(ctx context.Context, in *model.OrgMemberCreateInput) (*entity.OrgMember, error) {
 	var (
 		available bool
 		err       error
+		ent       *entity.OrgMember
 	)
 
 	// 验证成员手机号
 	if available, err = s.IsMemberUuidAvailable(ctx, in.OrgId, in.Uuid); err != nil {
-		return 0, err
+		return nil, err
 	}
 	if !available {
-		return 0, gerror.Newf("uuid is already exists: %s", in.Uuid)
+		return nil, gerror.Newf("uuid is already exists: %s", in.Uuid)
 	}
 
 	// 验证成员编号，如果有
 	if len(in.No) > 0 {
 		if available, err = s.IsMemberNoAvailable(ctx, in.OrgId, in.No); err != nil {
-			return 0, err
+			return nil, err
 		}
 		if !available {
-			return 0, gerror.Newf("no is already exists: %s", in.No)
+			return nil, gerror.Newf("no is already exists: %s", in.No)
 		}
 	}
 
@@ -55,17 +56,20 @@ func (s *sOrg) CreateMember(ctx context.Context, in *model.OrgMemberCreateInput)
 		insertId int64
 	)
 	if err = gconv.Struct(in, &data); err != nil {
-		return 0, err
+		return nil, err
 	}
 	data.Status = "normal"
 	if err = dao.OrgMember.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
 		insertId, err = dao.OrgMember.Ctx(ctx).Data(data).InsertAndGetId()
 		return err
 	}); err != nil {
-		return 0, err
+		return nil, err
+	}
+	if ent, err = s.GetMember(ctx, uint(insertId)); err != nil {
+		return nil, err
 	}
 
-	return uint(insertId), err
+	return ent, nil
 }
 
 // 获取成员
@@ -86,8 +90,9 @@ func (s *sOrg) GetMember(ctx context.Context, memberId uint) (*entity.OrgMember,
 }
 
 // 修改成员
-func (s *sOrg) UpdateMember(ctx context.Context, in *model.OrgMemberUpdateInput) error {
+func (s *sOrg) UpdateMember(ctx context.Context, in *model.OrgMemberUpdateInput) (*entity.OrgMember, error) {
 	var (
+		data      *do.OrgMember
 		ent       *entity.OrgMember
 		err       error
 		available bool
@@ -95,32 +100,34 @@ func (s *sOrg) UpdateMember(ctx context.Context, in *model.OrgMemberUpdateInput)
 
 	// 扫描数据
 	if ent, err = s.GetMember(ctx, in.MemberId); err != nil {
-		return err
+		return nil, err
 	}
 	if ent == nil {
-		return gerror.Newf("member is no exists: %d", in.MemberId)
+		return nil, gerror.Newf("member is no exists: %d", in.MemberId)
 	}
 	// 验证成员编号，如果有
 	if len(in.No) > 0 {
 		if available, err = s.IsMemberNoAvailable(ctx, ent.OrgId, in.No, []uint{ent.Id}...); err != nil {
-			return err
+			return nil, err
 		}
 		if !available {
-			return gerror.Newf("no is already exists: %s", in.No)
+			return nil, gerror.Newf("no is already exists: %s", in.No)
 		}
 	}
-
-	// 格式化更新
-	var (
-		data *do.OrgMember
-	)
+	// 转换数据
 	if err = gconv.Struct(in, &data); err != nil {
-		return err
+		return nil, err
 	}
-	return dao.OrgMember.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
+	// 更新实体
+	if err = dao.OrgMember.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
 		_, err = dao.OrgMember.Ctx(ctx).Where(dao.OrgMember.Columns().Id, in.MemberId).Data(data).Update()
 		return err
-	})
+	}); err != nil {
+		return nil, err
+	}
+	ent, _ = s.GetMember(ctx, in.MemberId)
+
+	return ent, nil
 }
 
 // 删除成员

@@ -13,9 +13,9 @@ import (
 )
 
 type IUser interface {
-	CreateGroup(ctx context.Context, in *model.UserGroupCreateInput) (uint, error)
+	CreateGroup(ctx context.Context, in *model.UserGroupCreateInput) (*entity.UserGroup, error)
 	GetGroup(ctx context.Context, groupId uint) (*entity.UserGroup, error)
-	UpdateGroup(ctx context.Context, in *model.UserGroupUpdateInput) error
+	UpdateGroup(ctx context.Context, in *model.UserGroupUpdateInput) (*entity.UserGroup, error)
 	DeleteGroup(ctx context.Context, groupId uint) error
 	GetAllGroup(ctx context.Context) ([]*entity.UserGroup, error)
 	GetGroupTreeData(ctx context.Context) (*model.TreeDataOutput, error)
@@ -27,10 +27,10 @@ type IUser interface {
 	CheckGroupIds(ctx context.Context, groupIds []uint) ([]uint, error)
 	DeleteGroupAccessByRuleID(ctx context.Context, ruleId uint) error
 	GetAllGroupAccess(ctx context.Context) ([]*entity.UserGroupAccess, error)
-	CreateUser(ctx context.Context, in *model.UserCreateInput) (uint, error)
+	CreateUser(ctx context.Context, in *model.UserCreateInput) (*entity.User, error)
 	GetUser(ctx context.Context, userId uint) (*entity.User, error)
 	GetUserByUuid(ctx context.Context, uuid string) (*entity.User, error)
-	UpdateUser(ctx context.Context, in *model.UserUpdateInput) error
+	UpdateUser(ctx context.Context, in *model.UserUpdateInput) (*entity.User, error)
 	DeleteUser(ctx context.Context, id uint) error
 	GetUserPage(ctx context.Context, in *model.Page) (*model.UserPageOutput, error)
 	GetUserGroupIDs(ctx context.Context, uuid string) ([]uint, error)

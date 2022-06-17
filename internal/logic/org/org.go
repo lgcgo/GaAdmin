@@ -25,27 +25,28 @@ func New() *sOrg {
 }
 
 // 创建组织
-func (s *sOrg) CreateOrg(ctx context.Context, in *model.OrgCreateInput) (uint, error) {
+func (s *sOrg) CreateOrg(ctx context.Context, in *model.OrgCreateInput) (*entity.Org, error) {
 	var (
 		available bool
 		err       error
+		ent       *entity.Org
 	)
 
 	// 验证组织名称
 	if available, err = s.IsNameAvailable(ctx, in.Name); err != nil {
-		return 0, err
+		return nil, err
 	}
 	if !available {
-		return 0, gerror.Newf("name is already exists: %s", in.Name)
+		return nil, gerror.Newf("name is already exists: %s", in.Name)
 	}
 
 	// 验证组织编码，如果有
 	if len(in.CertificatesNo) > 0 {
 		if available, err = s.IsCertificatesNoAvailable(ctx, in.CertificatesNo); err != nil {
-			return 0, err
+			return nil, err
 		}
 		if !available {
-			return 0, gerror.Newf("certificatesNo is already exists: %s", in.CertificatesNo)
+			return nil, gerror.Newf("certificatesNo is already exists: %s", in.CertificatesNo)
 		}
 	}
 
@@ -54,17 +55,21 @@ func (s *sOrg) CreateOrg(ctx context.Context, in *model.OrgCreateInput) (uint, e
 		data     *do.Org
 		insertId int64
 	)
+
 	if err = gconv.Struct(in, &data); err != nil {
-		return 0, err
+		return nil, err
 	}
 	if err = dao.Org.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
 		insertId, err = dao.Org.Ctx(ctx).Data(data).InsertAndGetId()
 		return err
 	}); err != nil {
-		return 0, err
+		return nil, err
+	}
+	if ent, err = s.GetOrg(ctx, uint(insertId)); err != nil {
+		return nil, err
 	}
 
-	return uint(insertId), err
+	return ent, nil
 }
 
 // 获取组织
@@ -85,8 +90,9 @@ func (s *sOrg) GetOrg(ctx context.Context, orgId uint) (*entity.Org, error) {
 }
 
 // 修改组织
-func (s *sOrg) UpdateOrg(ctx context.Context, in *model.OrgUpdateInput) error {
+func (s *sOrg) UpdateOrg(ctx context.Context, in *model.OrgUpdateInput) (*entity.Org, error) {
 	var (
+		data      *do.Org
 		ent       *entity.Org
 		err       error
 		available bool
@@ -94,39 +100,43 @@ func (s *sOrg) UpdateOrg(ctx context.Context, in *model.OrgUpdateInput) error {
 
 	// 扫描数据
 	if ent, err = s.GetOrg(ctx, in.OrgId); err != nil {
-		return err
+		return nil, err
 	}
 	if ent == nil {
-		return gerror.Newf("org is not exist: %d", in.OrgId)
+		return nil, gerror.Newf("org is not exist: %d", in.OrgId)
 	}
 
 	// 验证组织名称
 	if available, err = s.IsNameAvailable(ctx, in.Name, []uint{ent.Id}...); err != nil {
-		return err
+		return nil, err
 	}
 	if !available {
-		return gerror.Newf("name is already exists: %s", in.Name)
+		return nil, gerror.Newf("name is already exists: %s", in.Name)
 	}
 
 	// 验证组织编码，如果有
 	if len(in.CertificatesNo) > 0 {
 		if available, err = s.IsCertificatesNoAvailable(ctx, in.CertificatesNo, []uint{ent.Id}...); err != nil {
-			return err
+			return nil, err
 		}
 		if !available {
-			return gerror.Newf("certificatesNo is already exists: %s", in.CertificatesNo)
+			return nil, gerror.Newf("certificatesNo is already exists: %s", in.CertificatesNo)
 		}
 	}
-
-	// 格式化更新
-	var data *do.Org
+	// 转换数据
 	if err = gconv.Struct(in, &data); err != nil {
-		return err
+		return nil, err
 	}
-	return dao.Org.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
+	// 更新实体
+	if err = dao.Org.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
 		_, err = dao.Org.Ctx(ctx).Where(dao.Org.Columns().Id, in.OrgId).Data(data).Update()
 		return err
-	})
+	}); err != nil {
+		return nil, err
+	}
+	ent, _ = s.GetOrg(ctx, in.OrgId)
+
+	return ent, nil
 }
 
 // 删除组织

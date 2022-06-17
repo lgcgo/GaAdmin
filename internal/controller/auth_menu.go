@@ -18,32 +18,27 @@ var AuthMenu = cAuthMenu{}
 // 添加菜单
 func (c *cAuthMenu) Create(ctx context.Context, req *v1.AuthMenuCreateReq) (*v1.AuthMenuCreateRes, error) {
 	var (
-		ser    = service.Auth()
-		res    *v1.AuthMenuCreateRes
-		err    error
-		in     *model.AuthMenuCreateInput
-		ent    *entity.AuthMenu
-		menuId uint
+		ser = service.Auth()
+		res *v1.AuthMenuCreateRes
+		err error
+		in  *model.AuthMenuCreateInput
+		ent *entity.AuthMenu
 	)
 
-	// 格式化创建
+	// 转换参数
 	if err = gconv.Struct(req, &in); err != nil {
 		return nil, err
 	}
-	if menuId, err = ser.CreateMenu(ctx, in); err != nil {
+	// 创建实体
+	if ent, err = ser.CreateMenu(ctx, in); err != nil {
 		return nil, err
 	}
-
-	// 获取实体
-	if ent, err = ser.GetMenu(ctx, menuId); err != nil {
-		return nil, err
-	}
-
-	// 格式化响应
+	// 转换响应
 	if err = gconv.Struct(ent, &res); err != nil {
 		return nil, err
 	}
-	return res, err
+
+	return res, nil
 }
 
 // 获取菜单
@@ -58,16 +53,15 @@ func (c *cAuthMenu) Get(ctx context.Context, req *v1.AuthMenuGetReq) (*v1.AuthMe
 	if ent, err = service.Auth().GetMenu(ctx, req.MenuId); err != nil {
 		return nil, err
 	}
-
 	if ent == nil {
 		return nil, gerror.New("menu is not exists")
 	}
-
-	// 格式化响应
+	// 转换响应
 	if err = gconv.Struct(ent, &res); err != nil {
 		return nil, err
 	}
-	return res, err
+
+	return res, nil
 }
 
 // 修改菜单
@@ -80,26 +74,20 @@ func (c *cAuthMenu) Update(ctx context.Context, req *v1.AuthMenuUpdateReq) (*v1.
 		ent *entity.AuthMenu
 	)
 
-	// 更新实体
+	// 转换参数
 	if err = gconv.Struct(req, &in); err != nil {
 		return nil, err
 	}
-	if err = ser.UpdateMenu(ctx, in); err != nil {
+	// 更新实体
+	if ent, err = ser.UpdateMenu(ctx, in); err != nil {
 		return nil, err
 	}
-	// 获取实体
-	if ent, err = ser.GetMenu(ctx, req.MenuId); err != nil {
-		return nil, err
-	}
-	if ent == nil {
-		return nil, gerror.New("menu is not exists")
-	}
-	// 格式化响应
+	// 转换响应
 	if err = gconv.Struct(ent, &res); err != nil {
 		return nil, err
 	}
 
-	return res, err
+	return res, nil
 }
 
 // 删除菜单
@@ -129,8 +117,7 @@ func (c *cAuthMenu) Tree(ctx context.Context, req *v1.AuthMenuTreeReq) (*v1.Auth
 	if out, err = service.Auth().GetMenuTreeData(ctx); err != nil {
 		return nil, err
 	}
-
-	// 格式化响应
+	// 转换响应
 	if err = gconv.Struct(out, &res); err != nil {
 		return nil, err
 	}

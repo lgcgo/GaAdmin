@@ -15,12 +15,16 @@ func (c *cUserGroupAccess) Setup(ctx context.Context, req *v1.UserGroupAccessSet
 		res *v1.UserGroupAccessSetupRes
 		err error
 	)
+
+	// 设置用户组权限
 	if err = service.User().SetupGroupAccess(ctx, req.GroupId, req.AuthRuleIds); err != nil {
 		return nil, err
 	}
+	// 转换响应
 	res = &v1.UserGroupAccessSetupRes{
 		GroupId:     req.GroupId,
 		AuthRuleIds: req.AuthRuleIds,
 	}
+
 	return res, nil
 }
