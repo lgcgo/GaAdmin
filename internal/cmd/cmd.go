@@ -26,6 +26,7 @@ var (
 				group.Bind(
 					controller.UserSign, // 用户登录
 				)
+				group.Middleware(middleware.Authentication)
 				group.Bind(
 					controller.AuthRule,        // 权限规则
 					controller.AuthMenu,        // 权限菜单
