@@ -174,11 +174,11 @@ type UserSignRefreshRes struct {
 // - 当手存在机号|邮箱，则验证码必填
 type UserSignUpReq struct {
 	g.Meta   `path:"/user/sign-up" method:"post" tags:"UserService" summary:"Sign up"`
-	Account  string `json:"account" v:"required-without-all:Mobile,Email|length:6,16"` // 账号
-	Password string `json:"password" v:"required-with:Account|length:6,16"`            // 密码
-	Nickname string `json:"nickname" v:"required|length:5,16"`                         // 昵称
+	Account  string `json:"account" v:"required-without-all:Mobile,Email|length:4,32"` // 账号
+	Password string `json:"password" v:"required-with:Account|length:6,32"`            // 密码
+	Nickname string `json:"nickname" v:"required|length:4,32"`                         // 昵称
 	Mobile   string `json:"mobile" v:"required-without-all:Account,Email|phone"`       // 手机号
-	Captcha  string `json:"captcha" v:"required-with:Mobile,Email"`                    // 验证码
+	Captcha  string `json:"captcha" v:"required-with:Mobile,Email|length:4,8"`         // 验证码
 	Email    string `json:"email" v:"required-without-all:Account,Mobile|email"`       // 电子邮箱
 	Avatar   string `json:"avatar"`                                                    // 头像
 }
@@ -190,10 +190,10 @@ type UserSignUpRes struct {
 // 登录次数超过后，服务要求 Captcha 验证
 type UserSignPassportReq struct {
 	g.Meta   `path:"/user/sign-passport" tags:"UserService" method:"post" summary:"Sign in passport"`
-	Passport string `json:"passport" v:"required"` // 账户|手机号|邮箱
-	Password string `json:"password" v:"required"` // 密码
-	Captcha  string `json:"captcha"`               // 验证码
-	Role     string `json:"role"`                  // 角色
+	Passport string `json:"passport" v:"required|length:4,32"` // 账户|手机号|邮箱
+	Password string `json:"password" v:"required|length:6:32"` // 密码
+	Captcha  string `json:"captcha" v:"length:4,8"`            // 验证码
+	Role     string `json:"role"`                              // 角色
 }
 type UserSignPassportRes struct {
 	TokenResData
@@ -202,9 +202,9 @@ type UserSignPassportRes struct {
 // 手机号 + 短信验证码 登录
 type UserSignMobileReq struct {
 	g.Meta  `path:"/user/sign-mobile" tags:"UserService" method:"post" summary:"Sign in mobile"`
-	Mobile  string `json:"mobile" v:"required"`  // 手机号
-	Captcha string `json:"captcha" v:"required"` // 验证码
-	Role    string `json:"role"`                 // 角色
+	Mobile  string `json:"mobile" v:"required|phone"`       // 手机号
+	Captcha string `json:"captcha" v:"required:length:4,8"` // 验证码
+	Role    string `json:"role"`                            // 角色
 }
 type UserSignMobileRes struct {
 	TokenResData
@@ -219,8 +219,8 @@ type UserSignOutRes struct{}
 // 手机 密码重置
 type UserResetMobileReq struct {
 	g.Meta  `path:"/user/password/reset-mobile" tags:"UserService" method:"post" summary:"Reset password mobile"`
-	Email   string `json:"email" v:"required"`
-	Captcha string `json:"captcha" v:"required"`
+	Email   string `json:"email" v:"required|email"`
+	Captcha string `json:"captcha" v:"required|length:4,8"`
 }
 type UserResetMobileRes struct {
 }
@@ -228,8 +228,8 @@ type UserResetMobileRes struct {
 // 邮件 密码重置
 type UserResetEmailReq struct {
 	g.Meta  `path:"/user/password/reset-email" tags:"UserService" method:"post" summary:"Reset password email"`
-	Email   string `json:"email" v:"required"`
-	Captcha string `json:"captcha" v:"required"`
+	Email   string `json:"email" v:"required|email"`
+	Captcha string `json:"captcha" v:"required|length:4,8"`
 }
 type UserResetEmailRes struct {
 }
