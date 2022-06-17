@@ -235,9 +235,13 @@ type UserResetEmailRes struct {
 }
 
 // 问答 密码重置
+type UserResetAnswer struct {
+	QuestionId uint   // 问题ID
+	AnswerText string // 回答内容
+}
 type UserResetQuestionReq struct {
 	g.Meta  `path:"/user/password/reset-question" tags:"UserService" method:"post" summary:"Reset password question"`
-	Answers []string `json:"answers" v:"required"`
+	Answers []UserResetAnswer `json:"answers" v:"required"`
 }
 type UserResetQuestionRes struct {
 }
