@@ -13,10 +13,10 @@ import (
 )
 
 type IOauth interface {
-	Authorization(ctx context.Context, subject string, issueRoles []string) (*model.TokenOutput, error)
+	Authorization(ctx context.Context, subject string, issueRole string) (*model.TokenOutput, error)
 	RefreshAuthorization(ctx context.Context, ticket string) (*model.TokenOutput, error)
 	ValidAuthorization(r *ghttp.Request) (g.Map, error)
-	CheckPath(r *ghttp.Request, issueRoles []string) (bool, error)
+	CheckPath(r *ghttp.Request, issueRole string) (bool, error)
 	SavePolicy(ctx context.Context) error
 }
 

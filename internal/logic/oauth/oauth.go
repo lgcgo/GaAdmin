@@ -29,7 +29,7 @@ func New() *sOauth {
 }
 
 // 签发授权
-func (s *sOauth) Authorization(ctx context.Context, subject string, issueRoles []string) (*model.TokenOutput, error) {
+func (s *sOauth) Authorization(ctx context.Context, subject string, issueRole string) (*model.TokenOutput, error) {
 	var (
 		pkg             = jwt.NewJwt()
 		atExpireTimeCfg = g.Cfg().MustGet(ctx, "jwt.accessToken.expireTime").String()
@@ -46,8 +46,8 @@ func (s *sOauth) Authorization(ctx context.Context, subject string, issueRoles [
 	)
 
 	iClaims = &jwt.IssueClaims{
-		Subject:    subject,
-		IssueRoles: issueRoles,
+		Subject:   subject,
+		IssueRole: issueRole,
 	}
 
 	// 制作 accessToken
@@ -92,7 +92,7 @@ func (s *sOauth) RefreshAuthorization(ctx context.Context, ticket string) (*mode
 	if claims["ist"] != "renew" {
 		return nil, gerror.New("claims ist not correct.")
 	}
-	return s.Authorization(ctx, claims["sub"].(string), claims["isr"].([]string))
+	return s.Authorization(ctx, claims["sub"].(string), claims["isr"].(string))
 }
 
 // 验证授权
@@ -125,26 +125,26 @@ func (s *sOauth) ValidAuthorization(r *ghttp.Request) (g.Map, error) {
 }
 
 // 检查路径
-func (s *sOauth) CheckPath(r *ghttp.Request, issueRoles []string) (bool, error) {
+func (s *sOauth) CheckPath(r *ghttp.Request, issueRole string) (bool, error) {
 	var (
 		plicy *casbin.Policy
 		err   error
 		ok    bool
 	)
-	for _, issueRole := range issueRoles {
-		plicy = &casbin.Policy{
-			Subject: issueRole,
-			Object:  r.URL.Path,
-			Action:  r.Method,
-		}
-		if ok, err = casbin.NewCasbin().Verify(plicy); err != nil {
-			return false, err
-		}
-		if ok {
-			return true, nil
-		}
+
+	plicy = &casbin.Policy{
+		Subject: issueRole,
+		Object:  r.URL.Path,
+		Action:  r.Method,
 	}
-	return false, gerror.New("no permission")
+	if ok, err = casbin.NewCasbin().Verify(plicy); err != nil {
+		return false, err
+	}
+	if !ok {
+		return false, gerror.New("no permission")
+	}
+
+	return true, nil
 }
 
 // 更新授权政策
