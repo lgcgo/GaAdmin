@@ -22,10 +22,14 @@ type IUser interface {
 	GetGroupTree(ctx context.Context) (*tree.Tree, error)
 	GetGroupName(ctx context.Context, gourpID uint) (string, error)
 	GetGroupChildrenIDs(ctx context.Context, groupId uint) ([]uint, error)
-	SetupGroupAccess(ctx context.Context, groupId uint, auth_rule_ids []uint) error
+	IsGroupNameAvailable(ctx context.Context, name string, notIds ...uint) (bool, error)
 	CheckGroupIds(ctx context.Context, groupIds []uint) ([]uint, error)
+	SetupGroupAccess(ctx context.Context, groupId uint, auth_rule_ids []uint) error
 	DeleteGroupAccessByRuleID(ctx context.Context, ruleId uint) error
 	GetAllGroupAccess(ctx context.Context) ([]*entity.UserGroupAccess, error)
+	SetupRoles(ctx context.Context, userId uint, group_ids []uint) error
+	DeleteRolesByGroupId(ctx context.Context, groupId uint) error
+	GetAllRoles(ctx context.Context) ([]*entity.UserRoles, error)
 	CreateUser(ctx context.Context, in *model.UserCreateInput) (*entity.User, error)
 	GetUser(ctx context.Context, userId uint) (*entity.User, error)
 	GetUserByUuid(ctx context.Context, uuid string) (*entity.User, error)
@@ -39,6 +43,9 @@ type IUser interface {
 	UpdateCurrentUserPassword(ctx context.Context, password string) error
 	SignPassport(ctx context.Context, in *model.UserSignPassportInput) (*entity.User, error)
 	SignMobile(ctx context.Context, in *model.UserSignMobile) (*entity.User, error)
+	IsUserAccountAvailable(ctx context.Context, account string, notIds ...uint) (bool, error)
+	IsUserMobileAvailable(ctx context.Context, mobile string, notIds ...uint) (bool, error)
+	IsUserEmailAvailable(ctx context.Context, email string, notIds ...uint) (bool, error)
 	MustEncryptPasword(password, salt string) string
 }
 

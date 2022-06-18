@@ -200,7 +200,6 @@ type UserSignMobileReq struct {
 	g.Meta  `path:"/user/sign-mobile" tags:"UserService" method:"post" summary:"Sign in mobile"`
 	Mobile  string `json:"mobile" v:"required|phone"`       // 手机号
 	Captcha string `json:"captcha" v:"required:length:4,8"` // 验证码
-	Role    string `json:"role"`                            // 角色
 }
 type UserSignMobileRes struct {
 	TokenResData
