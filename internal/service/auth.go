@@ -21,12 +21,10 @@ type IAuth interface {
 	GetMenuTreeData(ctx context.Context) (*model.TreeDataOutput, error)
 	GetMenuTree(ctx context.Context) (*tree.Tree, error)
 	GetMenuChildrenIds(ctx context.Context, menuId uint) ([]uint, error)
-	IsMenuTitleAvailable(ctx context.Context, title string, notIds ...uint) (bool, error)
 	CreateRule(ctx context.Context, in *model.AuthRuleCreateInput) (*entity.AuthRule, error)
 	GetRule(ctx context.Context, nodeId uint) (*entity.AuthRule, error)
 	UpdateRule(ctx context.Context, in *model.AuthRuleUpdateInput) (*entity.AuthRule, error)
 	DeleteRule(ctx context.Context, ruleId uint) error
-	IsRulePathMethodAvailable(ctx context.Context, path string, method string, notIds ...uint) (bool, error)
 	CheckRulesIds(ctx context.Context, ruleIds []uint) ([]uint, error)
 }
 

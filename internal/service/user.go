@@ -23,7 +23,6 @@ type IUser interface {
 	GetGroupName(ctx context.Context, gourpID uint) (string, error)
 	GetGroupChildrenIDs(ctx context.Context, groupId uint) ([]uint, error)
 	SetupGroupAccess(ctx context.Context, groupId uint, auth_rule_ids []uint) error
-	IsGroupNameAvailable(ctx context.Context, name string, notIds ...uint) (bool, error)
 	CheckGroupIds(ctx context.Context, groupIds []uint) ([]uint, error)
 	DeleteGroupAccessByRuleID(ctx context.Context, ruleId uint) error
 	GetAllGroupAccess(ctx context.Context) ([]*entity.UserGroupAccess, error)
@@ -40,9 +39,6 @@ type IUser interface {
 	UpdateCurrentUserPassword(ctx context.Context, password string) error
 	SignPassport(ctx context.Context, in *model.UserSignPassportInput) (*entity.User, error)
 	SignMobile(ctx context.Context, in *model.UserSignMobile) (*entity.User, error)
-	IsUserAccountAvailable(ctx context.Context, account string, notIds ...uint) (bool, error)
-	IsUserMobileAvailable(ctx context.Context, mobile string, notIds ...uint) (bool, error)
-	IsUserEmailAvailable(ctx context.Context, email string, notIds ...uint) (bool, error)
 	MustEncryptPasword(password, salt string) string
 }
 
