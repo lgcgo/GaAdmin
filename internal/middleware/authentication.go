@@ -8,17 +8,16 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/util/gconv"
 )
 
 // 权限认证中间件
 func Authentication(r *ghttp.Request) {
 	var (
-		ser        = service.Oauth()
-		claims     g.Map
-		err        error
-		issueRoles []string
-		ok         bool
+		ser       = service.Oauth()
+		claims    g.Map
+		err       error
+		issueRole string
+		ok        bool
 	)
 
 	// 验证授权
@@ -26,9 +25,9 @@ func Authentication(r *ghttp.Request) {
 		response.JsonErrorExit(r, "11003", "invalid token")
 	}
 	// 从签名中获取用户角色
-	issueRoles = gconv.Strings(claims["isr"])
+	issueRole = claims["isr"].(string)
 	// 验证权限
-	if ok, err = ser.CheckPath(r, issueRoles); err != nil {
+	if ok, err = ser.CheckPath(r, issueRole); err != nil {
 		response.JsonErrorExit(r, "-1", "system busy")
 	}
 	if !ok {
@@ -40,14 +39,14 @@ func Authentication(r *ghttp.Request) {
 		isAdmin bool
 	)
 
-	// 保持用户会话
+	// 取用户实体，先尝试会话获取
 	if user = service.Session().GetUser(r.Context()); user == nil {
-		// 自动更新上线
 		user, err = service.User().GetUserByUuid(r.Context(), claims["sub"].(string))
 		if err != nil {
 			response.JsonErrorExit(r, "-1", "system busy")
 		}
 	}
+
 	// 设置上下文
 	isAdmin = true
 	service.Context().SetUser(r.Context(), &model.ContextUser{
