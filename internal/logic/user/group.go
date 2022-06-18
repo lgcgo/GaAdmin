@@ -35,7 +35,7 @@ func (s *sUser) CreateGroup(ctx context.Context, in *model.UserGroupCreateInput)
 		}
 	}
 	// 路径防重
-	if available, err = s.IsGroupNameAvailable(ctx, in.Name); err != nil {
+	if available, err = s.isGroupNameAvailable(ctx, in.Name); err != nil {
 		return nil, err
 	}
 	if !available {
@@ -113,7 +113,7 @@ func (s *sUser) UpdateGroup(ctx context.Context, in *model.UserGroupUpdateInput)
 		}
 	}
 	// 名称防重
-	if available, err = s.IsGroupNameAvailable(ctx, in.Name, []uint{ent.Id}...); err != nil {
+	if available, err = s.isGroupNameAvailable(ctx, in.Name, []uint{ent.Id}...); err != nil {
 		return nil, err
 	}
 	if !available {
@@ -195,7 +195,7 @@ func (s *sUser) GetGroupTreeData(ctx context.Context) (*model.TreeDataOutput, er
 		out *model.TreeDataOutput
 		err error
 	)
-	if t, err = s.GetGroupTree(ctx); err != nil {
+	if t, err = s.getGroupTree(ctx); err != nil {
 		return nil, err
 	}
 	out = &model.TreeDataOutput{
@@ -206,8 +206,79 @@ func (s *sUser) GetGroupTreeData(ctx context.Context) (*model.TreeDataOutput, er
 	return out, nil
 }
 
+// 获取分组名称
+func (s *sUser) GetGroupName(ctx context.Context, gourpID uint) (string, error) {
+	var (
+		err error
+		val *gvar.Var
+	)
+
+	if val, err = dao.UserGroup.Ctx(ctx).Fields("name").Where(do.UserGroup{
+		Id: gourpID,
+	}).Value(); err != nil {
+		return "", err
+	}
+
+	return val.String(), nil
+}
+
+// 获取菜单子ID集
+func (s *sUser) GetGroupChildrenIDs(ctx context.Context, groupId uint) ([]uint, error) {
+	var (
+		t    *tree.Tree
+		err  error
+		keys []string
+		ids  []uint
+	)
+
+	// 获取树对象
+	if t, err = s.getGroupTree(ctx); err != nil {
+		return nil, err
+	}
+	// 获取子健集
+	if keys, err = t.GetSpecChildKeys(gconv.String(groupId)); err != nil {
+		return nil, err
+	}
+	// 格式转换
+	for _, v := range keys {
+		ids = append(ids, gconv.Uint(v))
+	}
+
+	return ids, nil
+}
+
+// 检测分组ID集
+func (s *sUser) CheckGroupIds(ctx context.Context, groupIds []uint) ([]uint, error) {
+	var (
+		m    = dao.UserGroup.Ctx(ctx)
+		err  error
+		list []*entity.UserGroup
+		res  []uint
+	)
+
+	arr := garray.NewIntArray(true)
+	for _, groupId := range groupIds {
+		arr.Append(int(groupId))
+	}
+	if err = m.Fields("id").Where("id IN(?)", groupIds).Scan(&list); err != nil {
+		return nil, err
+	}
+	for _, v := range list {
+		arr.RemoveValue(int(v.Id))
+	}
+	if !arr.IsEmpty() {
+		arr.Iterator(func(k int, v int) bool {
+			res = append(res, uint(v))
+			return true
+		})
+		return res, gerror.Newf("group_ids is unavailable: %s", arr.String())
+	}
+
+	return nil, nil
+}
+
 // 获取分组树
-func (s *sUser) GetGroupTree(ctx context.Context) (*tree.Tree, error) {
+func (s *sUser) getGroupTree(ctx context.Context) (*tree.Tree, error) {
 	var (
 		list []*entity.UserGroup
 		out  *tree.Tree
@@ -245,49 +316,8 @@ func (s *sUser) GetGroupTree(ctx context.Context) (*tree.Tree, error) {
 	return out, nil
 }
 
-// 获取分组名称
-func (s *sUser) GetGroupName(ctx context.Context, gourpID uint) (string, error) {
-	var (
-		err error
-		val *gvar.Var
-	)
-
-	if val, err = dao.UserGroup.Ctx(ctx).Fields("name").Where(do.UserGroup{
-		Id: gourpID,
-	}).Value(); err != nil {
-		return "", err
-	}
-
-	return val.String(), nil
-}
-
-// 获取菜单子ID集
-func (s *sUser) GetGroupChildrenIDs(ctx context.Context, groupId uint) ([]uint, error) {
-	var (
-		t    *tree.Tree
-		err  error
-		keys []string
-		ids  []uint
-	)
-
-	// 获取树对象
-	if t, err = s.GetGroupTree(ctx); err != nil {
-		return nil, err
-	}
-	// 获取子健集
-	if keys, err = t.GetSpecChildKeys(gconv.String(groupId)); err != nil {
-		return nil, err
-	}
-	// 格式转换
-	for _, v := range keys {
-		ids = append(ids, gconv.Uint(v))
-	}
-
-	return ids, nil
-}
-
 // 检测分组名称
-func (s *sUser) IsGroupNameAvailable(ctx context.Context, name string, notIds ...uint) (bool, error) {
+func (s *sUser) isGroupNameAvailable(ctx context.Context, name string, notIds ...uint) (bool, error) {
 	var (
 		m     = dao.UserGroup.Ctx(ctx)
 		count int
@@ -305,34 +335,4 @@ func (s *sUser) IsGroupNameAvailable(ctx context.Context, name string, notIds ..
 	}
 
 	return count == 0, nil
-}
-
-// 检测分组ID集
-func (s *sUser) CheckGroupIds(ctx context.Context, groupIds []uint) ([]uint, error) {
-	var (
-		m    = dao.UserGroup.Ctx(ctx)
-		err  error
-		list []*entity.UserGroup
-		res  []uint
-	)
-
-	arr := garray.NewIntArray(true)
-	for _, groupId := range groupIds {
-		arr.Append(int(groupId))
-	}
-	if err = m.Fields("id").Where("id IN(?)", groupIds).Scan(&list); err != nil {
-		return nil, err
-	}
-	for _, v := range list {
-		arr.RemoveValue(int(v.Id))
-	}
-	if !arr.IsEmpty() {
-		arr.Iterator(func(k int, v int) bool {
-			res = append(res, uint(v))
-			return true
-		})
-		return res, gerror.Newf("group_ids is unavailable: %s", arr.String())
-	}
-
-	return nil, nil
 }

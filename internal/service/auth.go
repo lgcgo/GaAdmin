@@ -8,8 +8,6 @@ import (
 	"GaAdmin/internal/model"
 	"GaAdmin/internal/model/entity"
 	"context"
-
-	"github.com/lgcgo/tree"
 )
 
 type IAuth interface {
@@ -19,7 +17,6 @@ type IAuth interface {
 	DeleteMenu(ctx context.Context, menuId uint) error
 	GetAllMenu(ctx context.Context) ([]*entity.AuthMenu, error)
 	GetMenuTreeData(ctx context.Context) (*model.TreeDataOutput, error)
-	GetMenuTree(ctx context.Context) (*tree.Tree, error)
 	GetMenuChildrenIds(ctx context.Context, menuId uint) ([]uint, error)
 	CreateRule(ctx context.Context, in *model.AuthRuleCreateInput) (*entity.AuthRule, error)
 	GetRule(ctx context.Context, nodeId uint) (*entity.AuthRule, error)

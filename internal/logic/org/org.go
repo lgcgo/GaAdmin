@@ -33,7 +33,7 @@ func (s *sOrg) CreateOrg(ctx context.Context, in *model.OrgCreateInput) (*entity
 	)
 
 	// 验证组织名称
-	if available, err = s.IsNameAvailable(ctx, in.Name); err != nil {
+	if available, err = s.isOrgNameAvailable(ctx, in.Name); err != nil {
 		return nil, err
 	}
 	if !available {
@@ -42,7 +42,7 @@ func (s *sOrg) CreateOrg(ctx context.Context, in *model.OrgCreateInput) (*entity
 
 	// 验证组织编码，如果有
 	if len(in.CertificatesNo) > 0 {
-		if available, err = s.IsCertificatesNoAvailable(ctx, in.CertificatesNo); err != nil {
+		if available, err = s.isCertificatesNoAvailable(ctx, in.CertificatesNo); err != nil {
 			return nil, err
 		}
 		if !available {
@@ -107,7 +107,7 @@ func (s *sOrg) UpdateOrg(ctx context.Context, in *model.OrgUpdateInput) (*entity
 	}
 
 	// 验证组织名称
-	if available, err = s.IsNameAvailable(ctx, in.Name, []uint{ent.Id}...); err != nil {
+	if available, err = s.isOrgNameAvailable(ctx, in.Name, []uint{ent.Id}...); err != nil {
 		return nil, err
 	}
 	if !available {
@@ -116,7 +116,7 @@ func (s *sOrg) UpdateOrg(ctx context.Context, in *model.OrgUpdateInput) (*entity
 
 	// 验证组织编码，如果有
 	if len(in.CertificatesNo) > 0 {
-		if available, err = s.IsCertificatesNoAvailable(ctx, in.CertificatesNo, []uint{ent.Id}...); err != nil {
+		if available, err = s.isCertificatesNoAvailable(ctx, in.CertificatesNo, []uint{ent.Id}...); err != nil {
 			return nil, err
 		}
 		if !available {
@@ -199,7 +199,7 @@ func (s *sOrg) GetOrgPage(ctx context.Context, in *model.Page) (*model.OrgPageOu
 }
 
 // 检测组织名称
-func (s *sOrg) IsNameAvailable(ctx context.Context, name string, notIds ...uint) (bool, error) {
+func (s *sOrg) isOrgNameAvailable(ctx context.Context, name string, notIds ...uint) (bool, error) {
 	var (
 		m     = dao.Org.Ctx(ctx)
 		count int
@@ -220,7 +220,7 @@ func (s *sOrg) IsNameAvailable(ctx context.Context, name string, notIds ...uint)
 }
 
 // 检查组织证件号码
-func (s *sOrg) IsCertificatesNoAvailable(ctx context.Context, certificatesNo string, notIds ...uint) (bool, error) {
+func (s *sOrg) isCertificatesNoAvailable(ctx context.Context, certificatesNo string, notIds ...uint) (bool, error) {
 	var (
 		m     = dao.Org.Ctx(ctx)
 		count int

@@ -21,7 +21,7 @@ func (s *sOrg) CreateMember(ctx context.Context, in *model.OrgMemberCreateInput)
 	)
 
 	// 检测会员ID
-	if available, err = s.IsMemberUserIdAvailable(ctx, in.OrgId, in.UserId); err != nil {
+	if available, err = s.isMemberUserIdAvailable(ctx, in.OrgId, in.UserId); err != nil {
 		return nil, err
 	}
 	if !available {
@@ -30,7 +30,7 @@ func (s *sOrg) CreateMember(ctx context.Context, in *model.OrgMemberCreateInput)
 
 	// 验证成员编号，如果有
 	if len(in.No) > 0 {
-		if available, err = s.IsMemberNoAvailable(ctx, in.OrgId, in.No); err != nil {
+		if available, err = s.isMemberNoAvailable(ctx, in.OrgId, in.No); err != nil {
 			return nil, err
 		}
 		if !available {
@@ -95,7 +95,7 @@ func (s *sOrg) UpdateMember(ctx context.Context, in *model.OrgMemberUpdateInput)
 	}
 	// 验证成员编号，如果有
 	if len(in.No) > 0 {
-		if available, err = s.IsMemberNoAvailable(ctx, ent.OrgId, in.No, []uint{ent.Id}...); err != nil {
+		if available, err = s.isMemberNoAvailable(ctx, ent.OrgId, in.No, []uint{ent.Id}...); err != nil {
 			return nil, err
 		}
 		if !available {
@@ -179,7 +179,7 @@ func (s *sOrg) GetMemberPage(ctx context.Context, in *model.Page) (*model.OrgMem
 }
 
 // 检测成员编号
-func (s *sOrg) IsMemberUserIdAvailable(ctx context.Context, orgId uint, userId uint, notIds ...uint) (bool, error) {
+func (s *sOrg) isMemberUserIdAvailable(ctx context.Context, orgId uint, userId uint, notIds ...uint) (bool, error) {
 	var (
 		m     = dao.OrgMember.Ctx(ctx)
 		count int
@@ -201,7 +201,7 @@ func (s *sOrg) IsMemberUserIdAvailable(ctx context.Context, orgId uint, userId u
 }
 
 // 检测成员编号
-func (s *sOrg) IsMemberNoAvailable(ctx context.Context, orgId uint, no string, notIds ...uint) (bool, error) {
+func (s *sOrg) isMemberNoAvailable(ctx context.Context, orgId uint, no string, notIds ...uint) (bool, error) {
 	var (
 		m     = dao.OrgMember.Ctx(ctx)
 		count int

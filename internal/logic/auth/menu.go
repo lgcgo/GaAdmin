@@ -30,7 +30,7 @@ func (s *sAuth) CreateMenu(ctx context.Context, in *model.AuthMenuCreateInput) (
 		}
 	}
 	// 标题防重
-	if available, err = s.IsMenuTitleAvailable(ctx, in.Title); err != nil {
+	if available, err = s.isMenuTitleAvailable(ctx, in.Title); err != nil {
 		return nil, err
 	}
 	if !available {
@@ -110,7 +110,7 @@ func (s *sAuth) UpdateMenu(ctx context.Context, in *model.AuthMenuUpdateInput) (
 		}
 	}
 	// 标题防重
-	if available, err = s.IsMenuTitleAvailable(ctx, in.Title, []uint{ent.Id}...); err != nil {
+	if available, err = s.isMenuTitleAvailable(ctx, in.Title, []uint{ent.Id}...); err != nil {
 		return nil, err
 	}
 	if !available {
@@ -183,7 +183,7 @@ func (s *sAuth) GetMenuTreeData(ctx context.Context) (*model.TreeDataOutput, err
 		out *model.TreeDataOutput
 		err error
 	)
-	if t, err = s.GetMenuTree(ctx); err != nil {
+	if t, err = s.getMenuTree(ctx); err != nil {
 		return nil, err
 	}
 	out = &model.TreeDataOutput{
@@ -193,8 +193,33 @@ func (s *sAuth) GetMenuTreeData(ctx context.Context) (*model.TreeDataOutput, err
 	return out, nil
 }
 
+// 获取菜单子ID集
+func (s *sAuth) GetMenuChildrenIds(ctx context.Context, menuId uint) ([]uint, error) {
+	var (
+		t    *tree.Tree
+		err  error
+		keys []string
+		ids  []uint
+	)
+
+	// 获取树对象
+	if t, err = s.getMenuTree(ctx); err != nil {
+		return nil, err
+	}
+	// 获取子健集
+	if keys, err = t.GetSpecChildKeys(gconv.String(menuId)); err != nil {
+		return nil, err
+	}
+	// 格式转换
+	for _, v := range keys {
+		ids = append(ids, gconv.Uint(v))
+	}
+
+	return ids, nil
+}
+
 // 获取菜单树
-func (s *sAuth) GetMenuTree(ctx context.Context) (*tree.Tree, error) {
+func (s *sAuth) getMenuTree(ctx context.Context) (*tree.Tree, error) {
 	var (
 		list []*entity.AuthMenu
 		out  *tree.Tree
@@ -232,33 +257,8 @@ func (s *sAuth) GetMenuTree(ctx context.Context) (*tree.Tree, error) {
 	return out, nil
 }
 
-// 获取菜单子ID集
-func (s *sAuth) GetMenuChildrenIds(ctx context.Context, menuId uint) ([]uint, error) {
-	var (
-		t    *tree.Tree
-		err  error
-		keys []string
-		ids  []uint
-	)
-
-	// 获取树对象
-	if t, err = s.GetMenuTree(ctx); err != nil {
-		return nil, err
-	}
-	// 获取子健集
-	if keys, err = t.GetSpecChildKeys(gconv.String(menuId)); err != nil {
-		return nil, err
-	}
-	// 格式转换
-	for _, v := range keys {
-		ids = append(ids, gconv.Uint(v))
-	}
-
-	return ids, nil
-}
-
 // 检测菜单名称
-func (s *sAuth) IsMenuTitleAvailable(ctx context.Context, title string, notIds ...uint) (bool, error) {
+func (s *sAuth) isMenuTitleAvailable(ctx context.Context, title string, notIds ...uint) (bool, error) {
 	var (
 		m     = dao.AuthMenu.Ctx(ctx)
 		count int

@@ -31,7 +31,7 @@ func (s *sAuth) CreateRule(ctx context.Context, in *model.AuthRuleCreateInput) (
 		}
 	}
 	// 路径防重
-	if available, err = s.IsRulePathMethodAvailable(ctx, in.Path, in.Method); err != nil {
+	if available, err = s.isRulePathMethodAvailable(ctx, in.Path, in.Method); err != nil {
 		return nil, err
 	}
 	if !available {
@@ -98,7 +98,7 @@ func (s *sAuth) UpdateRule(ctx context.Context, in *model.AuthRuleUpdateInput) (
 		}
 	}
 	// 路径防重
-	if available, err = s.IsRulePathMethodAvailable(ctx, in.Path, in.Method, []uint{ent.Id}...); err != nil {
+	if available, err = s.isRulePathMethodAvailable(ctx, in.Path, in.Method, []uint{ent.Id}...); err != nil {
 		return nil, err
 	}
 	if !available {
@@ -160,7 +160,7 @@ func (s *sAuth) DeleteRule(ctx context.Context, ruleId uint) error {
 }
 
 // 检测规则路径&请求方法
-func (s *sAuth) IsRulePathMethodAvailable(ctx context.Context, path string, method string, notIds ...uint) (bool, error) {
+func (s *sAuth) isRulePathMethodAvailable(ctx context.Context, path string, method string, notIds ...uint) (bool, error) {
 	var (
 		m     = dao.AuthRule.Ctx(ctx)
 		count int

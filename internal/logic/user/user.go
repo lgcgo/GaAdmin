@@ -45,7 +45,7 @@ func (s *sUser) CreateUser(ctx context.Context, in *model.UserCreateInput) (*ent
 	}
 	// 账号防重，如果有
 	if len(in.Account) > 0 {
-		if available, err = s.IsUserAccountAvailable(ctx, in.Account); err != nil {
+		if available, err = s.isUserAccountAvailable(ctx, in.Account); err != nil {
 			return nil, err
 		}
 		if !available {
@@ -60,7 +60,7 @@ func (s *sUser) CreateUser(ctx context.Context, in *model.UserCreateInput) (*ent
 	}
 	// 手机号防重，如果有
 	if len(in.Mobile) > 0 {
-		if available, err = s.IsUserMobileAvailable(ctx, in.Mobile); err != nil {
+		if available, err = s.isUserMobileAvailable(ctx, in.Mobile); err != nil {
 			return nil, err
 		}
 		if !available {
@@ -69,7 +69,7 @@ func (s *sUser) CreateUser(ctx context.Context, in *model.UserCreateInput) (*ent
 	}
 	// Email防重，如果有
 	if len(in.Email) > 0 {
-		if available, err = s.IsUserEmailAvailable(ctx, in.Email); err != nil {
+		if available, err = s.isUserEmailAvailable(ctx, in.Email); err != nil {
 			return nil, err
 		}
 		if !available {
@@ -92,7 +92,7 @@ func (s *sUser) CreateUser(ctx context.Context, in *model.UserCreateInput) (*ent
 	}
 	data.Uuid = guid.S()
 	data.Salt = salt
-	data.Password = s.MustEncryptPasword(in.Password, salt)
+	data.Password = s.mustEncryptPasword(in.Password, salt)
 	// 创建实体
 	if err = dao.User.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
 		insertId, err = dao.User.Ctx(ctx).Data(data).InsertAndGetId()
@@ -160,7 +160,7 @@ func (s *sUser) UpdateUser(ctx context.Context, in *model.UserUpdateInput) (*ent
 	}
 	// 账户防重，如果有
 	if len(in.Account) > 0 {
-		if available, err = s.IsUserAccountAvailable(ctx, in.Account, []uint{ent.Id}...); err != nil {
+		if available, err = s.isUserAccountAvailable(ctx, in.Account, []uint{ent.Id}...); err != nil {
 			return nil, err
 		}
 		if !available {
@@ -169,7 +169,7 @@ func (s *sUser) UpdateUser(ctx context.Context, in *model.UserUpdateInput) (*ent
 	}
 	// 手机号防重，如果有
 	if len(in.Mobile) > 0 {
-		if available, err = s.IsUserMobileAvailable(ctx, in.Mobile, []uint{ent.Id}...); err != nil {
+		if available, err = s.isUserMobileAvailable(ctx, in.Mobile, []uint{ent.Id}...); err != nil {
 			return nil, err
 		}
 		if !available {
@@ -178,7 +178,7 @@ func (s *sUser) UpdateUser(ctx context.Context, in *model.UserUpdateInput) (*ent
 	}
 	// 邮箱防重，如果有
 	if len(in.Account) > 0 {
-		if available, err = s.IsUserEmailAvailable(ctx, in.Email, []uint{ent.Id}...); err != nil {
+		if available, err = s.isUserEmailAvailable(ctx, in.Email, []uint{ent.Id}...); err != nil {
 			return nil, err
 		}
 		if !available {
@@ -193,7 +193,7 @@ func (s *sUser) UpdateUser(ctx context.Context, in *model.UserUpdateInput) (*ent
 	if len(in.Password) > 0 {
 		var salt = grand.Letters(4)
 		data.Salt = salt
-		data.Password = s.MustEncryptPasword(in.Password, salt)
+		data.Password = s.mustEncryptPasword(in.Password, salt)
 	} else {
 		data.Password = nil
 	}
@@ -295,7 +295,7 @@ func (s *sUser) UpdateUserAccount(ctx context.Context, account string) error {
 		return err
 	}
 	// 检测防重
-	if available, err = s.IsUserAccountAvailable(ctx, account, []uint{ent.Id}...); err != nil {
+	if available, err = s.isUserAccountAvailable(ctx, account, []uint{ent.Id}...); err != nil {
 		return err
 	}
 	if !available {
@@ -325,7 +325,7 @@ func (s *sUser) UpdateCurrentUserMobile(ctx context.Context, mobile string) erro
 		return err
 	}
 	// 检测防重
-	if available, err = s.IsUserMobileAvailable(ctx, mobile, []uint{ent.Id}...); err != nil {
+	if available, err = s.isUserMobileAvailable(ctx, mobile, []uint{ent.Id}...); err != nil {
 		return err
 	}
 	if !available {
@@ -355,7 +355,7 @@ func (s *sUser) UpdateCurrentUserEmail(ctx context.Context, email string) error 
 		return err
 	}
 	// 检测防重
-	if available, err = s.IsUserEmailAvailable(ctx, email, []uint{ent.Id}...); err != nil {
+	if available, err = s.isUserEmailAvailable(ctx, email, []uint{ent.Id}...); err != nil {
 		return err
 	}
 	if !available {
@@ -383,7 +383,7 @@ func (s *sUser) UpdateCurrentUserPassword(ctx context.Context, password string) 
 	if ent, err = s.GetCurrentUser(ctx); err != nil {
 		return err
 	}
-	password = s.MustEncryptPasword(password, grand.Letters(4))
+	password = s.mustEncryptPasword(password, grand.Letters(4))
 
 	return dao.User.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
 		_, err = dao.User.Ctx(ctx).
@@ -404,7 +404,7 @@ func (s *sUser) SignPassport(ctx context.Context, in *model.UserSignPassportInpu
 
 	// 优先尝试找手机号
 	if err = g.Validator().Rules("phone").Run(ctx); err != nil {
-		if isNoFind, err = s.IsUserMobileAvailable(ctx, in.Passport); err != nil {
+		if isNoFind, err = s.isUserMobileAvailable(ctx, in.Passport); err != nil {
 			return nil, err
 		}
 		if !isNoFind {
@@ -418,7 +418,7 @@ func (s *sUser) SignPassport(ctx context.Context, in *model.UserSignPassportInpu
 	// 手机号找不到，尝试找邮箱
 	if ent == nil {
 		if err = g.Validator().Rules("email").Run(ctx); err != nil {
-			if isNoFind, err = s.IsUserEmailAvailable(ctx, in.Passport); err != nil {
+			if isNoFind, err = s.isUserEmailAvailable(ctx, in.Passport); err != nil {
 				return nil, err
 			}
 			if !isNoFind {
@@ -432,7 +432,7 @@ func (s *sUser) SignPassport(ctx context.Context, in *model.UserSignPassportInpu
 	}
 	// 邮箱还是找不到，最后找账号
 	if ent == nil {
-		if isNoFind, err = s.IsUserAccountAvailable(ctx, in.Passport); err != nil {
+		if isNoFind, err = s.isUserAccountAvailable(ctx, in.Passport); err != nil {
 			return nil, err
 		}
 		if !isNoFind {
@@ -444,7 +444,7 @@ func (s *sUser) SignPassport(ctx context.Context, in *model.UserSignPassportInpu
 		}
 	}
 	// 账号密码匹配
-	if ent == nil || s.MustEncryptPasword(in.Password, ent.Salt) != ent.Password {
+	if ent == nil || s.mustEncryptPasword(in.Password, ent.Salt) != ent.Password {
 		return nil, gerror.New("passport or password not correct.")
 	}
 
@@ -472,7 +472,7 @@ func (s *sUser) SignMobile(ctx context.Context, in *model.UserSignMobile) (*enti
 }
 
 // 检测账号
-func (s *sUser) IsUserAccountAvailable(ctx context.Context, account string, notIds ...uint) (bool, error) {
+func (s *sUser) isUserAccountAvailable(ctx context.Context, account string, notIds ...uint) (bool, error) {
 	var (
 		m     = dao.User.Ctx(ctx)
 		count int
@@ -491,7 +491,7 @@ func (s *sUser) IsUserAccountAvailable(ctx context.Context, account string, notI
 }
 
 // 检测手机号
-func (s *sUser) IsUserMobileAvailable(ctx context.Context, mobile string, notIds ...uint) (bool, error) {
+func (s *sUser) isUserMobileAvailable(ctx context.Context, mobile string, notIds ...uint) (bool, error) {
 	var (
 		m     = dao.User.Ctx(ctx)
 		count int
@@ -510,7 +510,7 @@ func (s *sUser) IsUserMobileAvailable(ctx context.Context, mobile string, notIds
 }
 
 // 检测Email
-func (s *sUser) IsUserEmailAvailable(ctx context.Context, email string, notIds ...uint) (bool, error) {
+func (s *sUser) isUserEmailAvailable(ctx context.Context, email string, notIds ...uint) (bool, error) {
 	var (
 		m     = dao.User.Ctx(ctx)
 		count int
@@ -529,6 +529,6 @@ func (s *sUser) IsUserEmailAvailable(ctx context.Context, email string, notIds .
 }
 
 // 密码盐加密
-func (s *sUser) MustEncryptPasword(password, salt string) string {
+func (s *sUser) mustEncryptPasword(password, salt string) string {
 	return gmd5.MustEncryptString(password + salt)
 }
