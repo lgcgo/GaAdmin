@@ -11,7 +11,7 @@ import (
 // OrgMember is the golang structure for table org_member.
 type OrgMember struct {
 	Id           uint        `json:"id"           ` // ID
-	Uuid         string      `json:"uuid"         ` // 唯一ID
+	UserId       uint        `json:"userId"       ` // 用户ID
 	OrgId        uint        `json:"orgId"        ` // 公司ID
 	Realname     string      `json:"realname"     ` // 真实名称
 	No           string      `json:"no"           ` // 工号

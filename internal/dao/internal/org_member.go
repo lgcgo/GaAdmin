@@ -20,7 +20,7 @@ type OrgMemberDao struct {
 // OrgMemberColumns defines and stores column names for table org_member.
 type OrgMemberColumns struct {
 	Id           string // ID
-	Uuid         string // 唯一ID
+	UserId       string // 用户ID
 	OrgId        string // 公司ID
 	Realname     string // 真实名称
 	No           string // 工号
@@ -33,7 +33,7 @@ type OrgMemberColumns struct {
 //  orgMemberColumns holds the columns for table org_member.
 var orgMemberColumns = OrgMemberColumns{
 	Id:           "id",
-	Uuid:         "uuid",
+	UserId:       "user_id",
 	OrgId:        "org_id",
 	Realname:     "realname",
 	No:           "no",

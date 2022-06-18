@@ -25,7 +25,7 @@ type OrgPageOutput struct {
 
 // 成员管理
 type OrgMemberCreateInput struct {
-	Uuid         string
+	UserId       uint
 	OrgId        uint
 	Realname     string
 	InitPassword string
