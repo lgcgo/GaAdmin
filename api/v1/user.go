@@ -11,7 +11,6 @@ type UserResData struct {
 	Avatar       string `json:"avatar"`       // 头像
 	Mobile       string `json:"mobile"`       // 手机号
 	Email        string `json:"email"`        // 电子邮箱
-	GroupIds     []uint `json:"group_ids"`    // 用户组ID集
 	Loginfailure uint   `json:"loginfailure"` // 失败次数
 	Loginip      string `json:"loginip"`      // 登录IP
 	LastLoginAt  string `json:"lastLoginAt"`  // 登录日期
@@ -29,7 +28,6 @@ type UserCreateReq struct {
 	Avatar   string `json:"avatar"`                // 头像
 	Mobile   string `json:"mobile"`                // 手机号
 	Email    string `json:"email"`                 // 电子邮箱
-	GroupIds []uint `json:"group_ids"`             // 用户组ID集
 }
 type UserCreateRes struct {
 	UserResData
@@ -48,13 +46,12 @@ type UserGetRes struct {
 type UserUpdateReq struct {
 	g.Meta   `path:"/user" method:"put" tags:"UserService" summary:"Update user"`
 	UserId   uint   `json:"userId" v:"required"`
-	Account  string `json:"account"`   // 账号
-	Password string `json:"password"`  // 密码
-	Nickname string `json:"nickname"`  // 昵称
-	Avatar   string `json:"avatar"`    // 头像
-	Mobile   string `json:"mobile"`    // 手机号
-	Email    string `json:"email"`     // 电子邮箱
-	GroupIds []uint `json:"group_ids"` // 用户组ID集
+	Account  string `json:"account"`  // 账号
+	Password string `json:"password"` // 密码
+	Nickname string `json:"nickname"` // 昵称
+	Avatar   string `json:"avatar"`   // 头像
+	Mobile   string `json:"mobile"`   // 手机号
+	Email    string `json:"email"`    // 电子邮箱
 }
 type UserUpdateRes struct {
 	UserResData
@@ -191,9 +188,8 @@ type UserSignUpRes struct {
 type UserSignPassportReq struct {
 	g.Meta   `path:"/user/sign-passport" tags:"UserService" method:"post" summary:"Sign in passport"`
 	Passport string `json:"passport" v:"required|length:4,32"` // 账户|手机号|邮箱
-	Password string `json:"password" v:"required|length:6:32"` // 密码
+	Password string `json:"password" v:"required|length:6,32"` // 密码
 	Captcha  string `json:"captcha" v:"length:4,8"`            // 验证码
-	Role     string `json:"role"`                              // 角色
 }
 type UserSignPassportRes struct {
 	TokenResData

@@ -37,7 +37,7 @@ func (c *cUserSign) SignUp(ctx context.Context, req *v1.UserSignUpReq) (*v1.User
 		return nil, err
 	}
 	// 生成授权Token
-	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, []string{"root"}); err != nil {
+	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, "root"); err != nil {
 		return nil, err
 	}
 	// 转换响应
@@ -67,7 +67,7 @@ func (c *cUserSign) SignPassport(ctx context.Context, req *v1.UserSignPassportRe
 		return nil, err
 	}
 	// 生成授权Token
-	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, []string{"root"}); err != nil {
+	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, "root"); err != nil {
 		return nil, err
 	}
 	// 转换响应
@@ -96,7 +96,7 @@ func (c *cUserSign) SignMobile(ctx context.Context, req *v1.UserSignMobileReq) (
 		return nil, err
 	}
 	// 生成授权Token
-	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, []string{"root"}); err != nil {
+	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, "root"); err != nil {
 		return nil, err
 	}
 	// 转换响应

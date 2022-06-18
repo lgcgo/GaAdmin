@@ -33,8 +33,6 @@ type IUser interface {
 	UpdateUser(ctx context.Context, in *model.UserUpdateInput) (*entity.User, error)
 	DeleteUser(ctx context.Context, id uint) error
 	GetUserPage(ctx context.Context, in *model.Page) (*model.UserPageOutput, error)
-	GetUserGroupIDs(ctx context.Context, uuid string) ([]uint, error)
-	SetUserGroupIDs(ctx context.Context, userId uint, groupIDs []uint) error
 	GetCurrentUser(ctx context.Context) (*entity.User, error)
 	UpdateUserAccount(ctx context.Context, account string) error
 	UpdateCurrentUserMobile(ctx context.Context, mobile string) error

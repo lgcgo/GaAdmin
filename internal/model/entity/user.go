@@ -19,7 +19,6 @@ type User struct {
 	Avatar       string      `json:"avatar"       ` // 头像
 	Mobile       string      `json:"mobile"       ` // 手机号
 	Email        string      `json:"email"        ` // 电子邮箱
-	GroupIds     string      `json:"groupIds"     ` // 用户组ID集
 	Loginfailure uint        `json:"loginfailure" ` // 失败次数
 	Loginip      string      `json:"loginip"      ` // 登录IP
 	LastLoginAt  *gtime.Time `json:"lastLoginAt"  ` // 登录日期

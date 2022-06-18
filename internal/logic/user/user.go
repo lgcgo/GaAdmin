@@ -8,7 +8,6 @@ import (
 	"GaAdmin/internal/service"
 	"context"
 
-	"github.com/gogf/gf/v2/container/gvar"
 	"github.com/gogf/gf/v2/crypto/gmd5"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -77,14 +76,6 @@ func (s *sUser) CreateUser(ctx context.Context, in *model.UserCreateInput) (*ent
 			return nil, gerror.Newf("email is already exists: %s", in.Email)
 		}
 	}
-	// 检测用户组IDs
-	// if len(in.GroupIds) == 0 {
-	// 	defaultGroupId := g.Cfg().MustGet(ctx, "setting.defaultGroupId").Uint()
-	// 	in.GroupIds = append(in.GroupIds, defaultGroupId)
-	// }
-	if _, err = s.CheckGroupIds(ctx, in.GroupIds); err != nil {
-		return nil, err
-	}
 	// 支持无密码创建
 	if len(in.Password) == 0 {
 		in.Password = grand.Letters(6)
@@ -121,11 +112,14 @@ func (s *sUser) GetUser(ctx context.Context, userId uint) (*entity.User, error) 
 		err error
 	)
 
-	err = dao.User.Ctx(ctx).Where(dao.User.Columns().Id, userId).Scan(&ent)
-	if ent == nil {
-		err = gerror.Newf("user not exist: %d", userId)
+	// 扫描数据
+	if err = dao.UserGroup.Ctx(ctx).Where(do.User{
+		Id: userId,
+	}).Scan(&ent); err != nil {
+		return nil, err
 	}
-	return ent, err
+
+	return ent, nil
 }
 
 // 使用uuid获取用户
@@ -135,11 +129,17 @@ func (s *sUser) GetUserByUuid(ctx context.Context, uuid string) (*entity.User, e
 		err error
 	)
 
-	err = dao.User.Ctx(ctx).Where(dao.User.Columns().Uuid, uuid).Scan(&ent)
-	if ent == nil {
-		err = gerror.Newf("user not exist: %d", uuid)
+	// 扫描数据
+	if err = dao.UserGroup.Ctx(ctx).Where(do.User{
+		Uuid: uuid,
+	}).Scan(&ent); err != nil {
+		return nil, err
 	}
-	return ent, err
+	if ent == nil {
+		return nil, gerror.Newf("user not exist: %d", uuid)
+	}
+
+	return ent, nil
 }
 
 // 修改用户
@@ -154,6 +154,9 @@ func (s *sUser) UpdateUser(ctx context.Context, in *model.UserUpdateInput) (*ent
 	// 扫描数据
 	if ent, err = s.GetUser(ctx, in.UserId); err != nil {
 		return nil, err
+	}
+	if ent == nil {
+		return nil, gerror.Newf("user not exist: %d", in.UserId)
 	}
 	// 账户防重，如果有
 	if len(in.Account) > 0 {
@@ -180,12 +183,6 @@ func (s *sUser) UpdateUser(ctx context.Context, in *model.UserUpdateInput) (*ent
 		}
 		if !available {
 			return nil, gerror.Newf("email is already exists: %s", in.Email)
-		}
-	}
-	// 检测用户组IDs，如果有
-	if len(in.GroupIds) > 0 {
-		if _, err = s.CheckGroupIds(ctx, in.GroupIds); err != nil {
-			return nil, err
 		}
 	}
 	// 转换数据
@@ -267,43 +264,6 @@ func (s *sUser) GetUserPage(ctx context.Context, in *model.Page) (*model.UserPag
 	out.Page = in.Page
 
 	return out, err
-}
-
-// 获取用户组
-func (s *sUser) GetUserGroupIDs(ctx context.Context, uuid string) ([]uint, error) {
-	var (
-		err error
-		val *gvar.Var
-	)
-
-	if val, err = dao.User.Ctx(ctx).Fields("group_ids").Where(do.User{
-		Uuid: uuid,
-	}).Value(); err != nil {
-		return nil, err
-	}
-
-	return val.Uints(), err
-}
-
-// 设置用户组
-func (s *sUser) SetUserGroupIDs(ctx context.Context, userId uint, groupIDs []uint) error {
-	var (
-		err error
-	)
-
-	if err = dao.User.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
-		_, err = dao.User.Ctx(ctx).
-			Where(do.User{
-				Id: userId,
-			}).
-			Data(dao.User.Columns().GroupIds, groupIDs).
-			Update()
-		return err
-	}); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // 获取当前用户(用于前台)
@@ -506,7 +466,7 @@ func (s *sUser) SignMobile(ctx context.Context, in *model.UserSignMobile) (*enti
 		return nil, gerror.Newf("mobile is not find: %s", in.Mobile)
 	}
 	// 校验验证码
-	// 待补充...
+	service.Sms().Verify(ctx, in.Captcha, "signin")
 
 	return ent, nil
 }

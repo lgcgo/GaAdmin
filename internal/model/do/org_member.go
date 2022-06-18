@@ -13,7 +13,7 @@ import (
 type OrgMember struct {
 	g.Meta       `orm:"table:org_member, do:true"`
 	Id           interface{} // ID
-	Uuid         interface{} // 唯一ID
+	Uuid         interface{} // 用户唯一ID
 	OrgId        interface{} // 公司ID
 	Realname     interface{} // 真实名称
 	No           interface{} // 工号

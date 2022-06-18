@@ -10,7 +10,6 @@ type UserCreateInput struct {
 	Avatar   string
 	Mobile   string
 	Email    string
-	GroupIds []uint
 }
 
 // 修改用户
@@ -22,7 +21,6 @@ type UserUpdateInput struct {
 	Avatar   string
 	Mobile   string
 	Email    string
-	GroupIds []uint
 }
 
 // 用户分页

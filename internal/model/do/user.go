@@ -21,7 +21,6 @@ type User struct {
 	Avatar       interface{} // 头像
 	Mobile       interface{} // 手机号
 	Email        interface{} // 电子邮箱
-	GroupIds     interface{} // 用户组ID集
 	Loginfailure interface{} // 失败次数
 	Loginip      interface{} // 登录IP
 	LastLoginAt  *gtime.Time // 登录日期

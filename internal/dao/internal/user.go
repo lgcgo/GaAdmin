@@ -28,7 +28,6 @@ type UserColumns struct {
 	Avatar       string // 头像
 	Mobile       string // 手机号
 	Email        string // 电子邮箱
-	GroupIds     string // 用户组ID集
 	Loginfailure string // 失败次数
 	Loginip      string // 登录IP
 	LastLoginAt  string // 登录日期
@@ -48,7 +47,6 @@ var userColumns = UserColumns{
 	Avatar:       "avatar",
 	Mobile:       "mobile",
 	Email:        "email",
-	GroupIds:     "group_ids",
 	Loginfailure: "loginfailure",
 	Loginip:      "loginip",
 	LastLoginAt:  "last_login_at",
