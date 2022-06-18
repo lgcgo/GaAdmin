@@ -9,20 +9,8 @@ import (
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
 )
-
-// 使用uuid获取成员
-func (s *sOrg) GetMemberByUuid(ctx context.Context, uuid string) (*entity.OrgMember, error) {
-	var (
-		ent *entity.OrgMember
-	)
-
-	err := dao.OrgMember.Ctx(ctx).Where(dao.OrgMember.Columns().Uuid, uuid).Scan(&ent)
-
-	return ent, err
-}
 
 // 创建成员
 func (s *sOrg) CreateMember(ctx context.Context, in *model.OrgMemberCreateInput) (*entity.OrgMember, error) {
@@ -32,12 +20,12 @@ func (s *sOrg) CreateMember(ctx context.Context, in *model.OrgMemberCreateInput)
 		ent       *entity.OrgMember
 	)
 
-	// 验证成员手机号
-	if available, err = s.IsMemberUuidAvailable(ctx, in.OrgId, in.Uuid); err != nil {
+	// 检测会员ID
+	if available, err = s.IsMemberUserIdAvailable(ctx, in.OrgId, in.UserId); err != nil {
 		return nil, err
 	}
 	if !available {
-		return nil, gerror.Newf("uuid is already exists: %s", in.Uuid)
+		return nil, gerror.Newf("user is already exists: %s", in.UserId)
 	}
 
 	// 验证成员编号，如果有
@@ -190,8 +178,8 @@ func (s *sOrg) GetMemberPage(ctx context.Context, in *model.Page) (*model.OrgMem
 	return out, err
 }
 
-// 检测成员UUID
-func (s *sOrg) IsMemberUuidAvailable(ctx context.Context, orgId uint, uuid string, notIds ...uint) (bool, error) {
+// 检测成员编号
+func (s *sOrg) IsMemberUserIdAvailable(ctx context.Context, orgId uint, userId uint, notIds ...uint) (bool, error) {
 	var (
 		m     = dao.OrgMember.Ctx(ctx)
 		count int
@@ -202,9 +190,9 @@ func (s *sOrg) IsMemberUuidAvailable(ctx context.Context, orgId uint, uuid strin
 	for _, v := range notIds {
 		m = m.WhereNot(dao.OrgMember.Columns().Id, v)
 	}
-	if count, err = m.Where(g.Map{
-		dao.OrgMember.Columns().OrgId: orgId,
-		dao.OrgMember.Columns().Uuid:  uuid,
+	if count, err = m.Where(do.OrgMember{
+		OrgId:  orgId,
+		UserId: userId,
 	}).Count(); err != nil {
 		return false, err
 	}
@@ -224,9 +212,9 @@ func (s *sOrg) IsMemberNoAvailable(ctx context.Context, orgId uint, no string, n
 	for _, v := range notIds {
 		m = m.WhereNot(dao.OrgMember.Columns().Id, v)
 	}
-	if count, err = m.Where(g.Map{
-		dao.OrgMember.Columns().OrgId: orgId,
-		dao.OrgMember.Columns().No:    no,
+	if count, err = m.Where(do.OrgMember{
+		OrgId: orgId,
+		No:    no,
 	}).Count(); err != nil {
 		return false, err
 	}
