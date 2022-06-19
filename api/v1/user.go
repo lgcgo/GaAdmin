@@ -145,6 +145,19 @@ type UserGroupAccessSetupRes struct {
 }
 
 /**
+* 用户角色
+**/
+type UserRolesSetupReq struct {
+	g.Meta   `path:"/user/roles" tags:"UserService" method:"post" summary:"Setup roles"`
+	UserId   uint   `json:"userId" v:"required"`
+	GroupIds []uint `json:"groupIds"`
+}
+type UserRolesSetupRes struct {
+	UserId   uint   `json:"userId"`
+	GroupIds []uint `json:"groupIds"`
+}
+
+/**
 *  用户认证
 **/
 // 授权返回

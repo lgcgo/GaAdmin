@@ -17,7 +17,7 @@ jwt:
   claims:
     issuer: "gaadmin.com"
   accessToken:
-    expireTime: 2h
+    expireTime: 24h
   refreshToken:
     expireTime: 72h 
 

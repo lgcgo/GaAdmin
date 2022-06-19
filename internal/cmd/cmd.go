@@ -35,6 +35,7 @@ var (
 					controller.User,            // 用户
 					controller.UserGroup,       // 用户分组
 					controller.UserGroupAccess, // 用户分组权限
+					controller.UserRoles,       // 用户角色
 				)
 			})
 			s.Run()
