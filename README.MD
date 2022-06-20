@@ -107,7 +107,37 @@ GaAdmin是基于GoFrame+Antd的中后台开发框架。系统集成了中后台�
 - 待完善...
 
 ## 安装使用
-- 待完善...
+
+想要提前体验或者学习参考的同学，可以按以下步骤启动项目进行测试。
+
+**Step1**: 下载源码
+```
+git clone https://github.com/lgcgo/GaAdmin
+```
+
+**Step2**: 导入数据
+- 创建Mysql数据库gaadmin
+- 导入manifest/data/data.sql
+
+**Step3**: 启动项目
+
+命令进入根目录
+```Shell
+cd GaAdmin
+```
+
+命令启动
+```Golang
+go run .
+```
+
+**Step4**: 开始测试
+
+- 接口文档：http://127.0.0.1:8000/swagger/
+
+- 测试工具：推荐使用Apifox，URL导入http://127.0.0.1:8000/api.json 开始测试
+
+- 测试用户：账号admin 密码123456
 
 ## 环境要求 
 - 待完善...
