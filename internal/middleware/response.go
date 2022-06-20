@@ -17,6 +17,7 @@ func Response(r *ghttp.Request) {
 	if r.Response.BufferLength() > 0 {
 		return
 	}
+
 	var (
 		msg      string
 		err      = r.GetError()
@@ -24,6 +25,7 @@ func Response(r *ghttp.Request) {
 		code     = gerror.Code(err)
 		showType = 2
 	)
+
 	if err != nil {
 		if code == gcode.CodeNil {
 			code = gcode.CodeInternalError

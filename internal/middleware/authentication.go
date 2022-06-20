@@ -39,14 +39,13 @@ func Authentication(r *ghttp.Request) {
 		isAdmin bool
 	)
 
-	// 取用户实体，先尝试会话获取
+	// 获取用户实体，优先会话获取
 	if user = service.Session().GetUser(r.Context()); user == nil {
 		user, err = service.User().GetUserByUuid(r.Context(), claims["sub"].(string))
 		if err != nil {
 			response.JsonErrorExit(r, "-1", "system busy")
 		}
 	}
-
 	// 设置上下文
 	isAdmin = true
 	service.Context().SetUser(r.Context(), &model.ContextUser{

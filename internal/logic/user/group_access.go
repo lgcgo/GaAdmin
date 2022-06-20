@@ -27,7 +27,7 @@ func (s *sUser) SetupGroupAccess(ctx context.Context, groupId uint, auth_rule_id
 		return gerror.Newf("group is not exists: %d", groupId)
 	}
 	// 检测权限ID集
-	if _, err = service.Auth().CheckRulesIds(ctx, auth_rule_ids); err != nil {
+	if err = service.Auth().CheckRuleIds(ctx, auth_rule_ids); err != nil {
 		return err
 	}
 	// 组装新增数据

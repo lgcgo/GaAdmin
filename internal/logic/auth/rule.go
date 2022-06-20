@@ -73,6 +73,22 @@ func (s *sAuth) GetRule(ctx context.Context, nodeId uint) (*entity.AuthRule, err
 	return ent, nil
 }
 
+// 获取实体集
+func (s *sAuth) GetRules(ctx context.Context, ruleIds []uint) ([]*entity.AuthRule, error) {
+	var (
+		m    = dao.AuthRule.Ctx(ctx)
+		list []*entity.AuthRule
+		err  error
+	)
+
+	// 扫描数据
+	if err = m.Fields("id").WhereIn("id", ruleIds).Scan(&list); err != nil {
+		return nil, err
+	}
+
+	return list, nil
+}
+
 // 修改规则
 func (s *sAuth) UpdateRule(ctx context.Context, in *model.AuthRuleUpdateInput) (*entity.AuthRule, error) {
 	var (
@@ -138,7 +154,6 @@ func (s *sAuth) DeleteRule(ctx context.Context, ruleId uint) error {
 	if ent == nil {
 		return gerror.Newf("node is not exists: %d", ruleId)
 	}
-
 	// 删除数据
 	if err = dao.AuthRule.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
 		if _, err = dao.AuthRule.Ctx(ctx).Where(do.AuthRule{
@@ -155,6 +170,33 @@ func (s *sAuth) DeleteRule(ctx context.Context, ruleId uint) error {
 	}
 	// 更新授权政策
 	service.Oauth().SavePolicy(ctx)
+
+	return nil
+}
+
+// 检测权限ID集
+func (s *sAuth) CheckRuleIds(ctx context.Context, ruleIds []uint) error {
+	var (
+		list []*entity.AuthRule
+		err  error
+	)
+
+	// 扫描数据
+	if list, err = s.GetRules(ctx, ruleIds); err != nil {
+		return err
+	}
+	// 创建容器
+	arr := garray.NewIntArray(true)
+	for _, ruleId := range ruleIds {
+		arr.Append(int(ruleId))
+	}
+	// 校对数据
+	for _, v := range list {
+		arr.RemoveValue(int(v.Id))
+	}
+	if !arr.IsEmpty() {
+		return gerror.Newf("rule_ids is unavailable: %s", arr.String())
+	}
 
 	return nil
 }
@@ -179,34 +221,4 @@ func (s *sAuth) isRulePathMethodAvailable(ctx context.Context, path string, meth
 	}
 
 	return count == 0, nil
-}
-
-// 检测权限ID集
-func (s *sAuth) CheckRulesIds(ctx context.Context, ruleIds []uint) ([]uint, error) {
-	var (
-		m    = dao.AuthRule.Ctx(ctx)
-		err  error
-		list []*entity.AuthRule
-		res  []uint
-	)
-
-	arr := garray.NewIntArray(true)
-	for _, ruleId := range ruleIds {
-		arr.Append(int(ruleId))
-	}
-	if err = m.Fields("id").Where("id IN(?)", ruleIds).Scan(&list); err != nil {
-		return nil, err
-	}
-	for _, v := range list {
-		arr.RemoveValue(int(v.Id))
-	}
-	if !arr.IsEmpty() {
-		arr.Iterator(func(k int, v int) bool {
-			res = append(res, uint(v))
-			return true
-		})
-		return res, gerror.Newf("rule_ids is unavailable: %s", arr.String())
-	}
-
-	return nil, nil
 }

@@ -36,8 +36,8 @@ func (c *cUserSign) SignUp(ctx context.Context, req *v1.UserSignUpReq) (*v1.User
 	if ent, err = service.User().CreateUser(ctx, in); err != nil {
 		return nil, err
 	}
-	// 生成授权Token
-	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, "root"); err != nil {
+	// 签发授权(普通用户)
+	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, "user"); err != nil {
 		return nil, err
 	}
 	// 转换响应
@@ -66,8 +66,8 @@ func (c *cUserSign) SignPassport(ctx context.Context, req *v1.UserSignPassportRe
 	if ent, err = service.User().SignPassport(ctx, in); err != nil {
 		return nil, err
 	}
-	// 生成授权Token
-	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, "root"); err != nil {
+	// 签发授权(普通用户)
+	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, "user"); err != nil {
 		return nil, err
 	}
 	// 转换响应
@@ -87,6 +87,7 @@ func (c *cUserSign) SignMobile(ctx context.Context, req *v1.UserSignMobileReq) (
 		out *model.TokenOutput
 		ent *entity.User
 	)
+
 	// 转换请求
 	if err = gconv.Struct(req, &in); err != nil {
 		return nil, err
@@ -95,8 +96,8 @@ func (c *cUserSign) SignMobile(ctx context.Context, req *v1.UserSignMobileReq) (
 	if ent, err = service.User().SignMobile(ctx, in); err != nil {
 		return nil, err
 	}
-	// 生成授权Token
-	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, "root"); err != nil {
+	// 签发授权(普通用户)
+	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, "user"); err != nil {
 		return nil, err
 	}
 	// 转换响应
@@ -114,18 +115,20 @@ func (c *cUserSign) Refresh(ctx context.Context, req *v1.UserSignRefreshReq) (*v
 		err error
 		out *model.TokenOutput
 	)
+
+	// 刷新授权
 	if out, err = service.Oauth().RefreshAuthorization(ctx, req.RefreshToken); err != nil {
 		return nil, err
 	}
-
 	// 转换响应
 	if err = gconv.Struct(out, &res); err != nil {
 		return nil, err
 	}
+
 	return res, nil
 }
 
-// 员工登出
+// 注销登录
 func (c *cUserSign) SignOut(ctx context.Context, req *v1.UserSignOutReq) (*v1.UserSignOutRes, error) {
 	// 这里可以添加token拉黑操作等
 

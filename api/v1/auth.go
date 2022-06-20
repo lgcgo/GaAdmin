@@ -3,6 +3,27 @@ package v1
 import "github.com/gogf/gf/v2/frame/g"
 
 /**
+* 基础权限
+**/
+// 设置基础权限
+type AuthAccessSetupBasicReq struct {
+	g.Meta  `path:"/auth/access/setup-basic" tags:"AuthService" method:"post" summary:"Setup basic access"`
+	RuleIds []uint `json:"ruleIds" v:"required"`
+}
+type AuthAccessSetupBasicRes struct {
+	RuleIds []uint `json:"ruleIds"`
+}
+
+// 设置限制权限（被禁用时仍拥有的权限）
+type AuthAccessSetupLimitedReq struct {
+	g.Meta  `path:"/auth/access/setup-limited" tags:"AuthService" method:"post" summary:"Setup limited access"`
+	RuleIds []uint `json:"ruleIds" v:"required"`
+}
+type AuthAccessSetupLimitedRes struct {
+	RuleIds []uint `json:"ruleIds"`
+}
+
+/**
 *  权限菜单
 **/
 // 权限菜单返回数据

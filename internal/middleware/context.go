@@ -13,12 +13,13 @@ func Context(r *ghttp.Request) {
 	var (
 		customCtx *model.Context
 	)
+
 	// 初始化，务必最开始执行
 	customCtx = &model.Context{
 		Session: r.Session,
 		Data:    make(g.Map),
 	}
 	service.Context().Init(r, customCtx)
-	// 执行下一步请求逻辑
+
 	r.Middleware.Next()
 }

@@ -28,6 +28,7 @@ var (
 				)
 				group.Middleware(middleware.Authentication)
 				group.Bind(
+					controller.AuthAccess,      // 基础权限
 					controller.AuthRule,        // 权限规则
 					controller.AuthMenu,        // 权限菜单
 					controller.Org,             // 组织机构

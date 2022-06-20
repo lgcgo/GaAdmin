@@ -11,18 +11,24 @@ import (
 )
 
 type IAuth interface {
+	GetBasicAccessRuleIds(ctx context.Context) ([]uint, error)
+	GetAllLimitedAccess(ctx context.Context) ([]uint, error)
+	SetupBasicAccess(ctx context.Context, ruleIds []uint) error
+	SetupLimitedAccess(ctx context.Context, ruleIds []uint) error
 	CreateMenu(ctx context.Context, in *model.AuthMenuCreateInput) (*entity.AuthMenu, error)
 	GetMenu(ctx context.Context, menuId uint) (*entity.AuthMenu, error)
+	GetMenus(ctx context.Context, menuIds []uint) ([]*entity.AuthMenu, error)
+	GetAllMenu(ctx context.Context) ([]*entity.AuthMenu, error)
 	UpdateMenu(ctx context.Context, in *model.AuthMenuUpdateInput) (*entity.AuthMenu, error)
 	DeleteMenu(ctx context.Context, menuId uint) error
-	GetAllMenu(ctx context.Context) ([]*entity.AuthMenu, error)
 	GetMenuTreeData(ctx context.Context) (*model.TreeDataOutput, error)
 	GetMenuChildrenIds(ctx context.Context, menuId uint) ([]uint, error)
 	CreateRule(ctx context.Context, in *model.AuthRuleCreateInput) (*entity.AuthRule, error)
 	GetRule(ctx context.Context, nodeId uint) (*entity.AuthRule, error)
+	GetRules(ctx context.Context, ruleIds []uint) ([]*entity.AuthRule, error)
 	UpdateRule(ctx context.Context, in *model.AuthRuleUpdateInput) (*entity.AuthRule, error)
 	DeleteRule(ctx context.Context, ruleId uint) error
-	CheckRulesIds(ctx context.Context, ruleIds []uint) ([]uint, error)
+	CheckRuleIds(ctx context.Context, ruleIds []uint) error
 }
 
 var localAuth IAuth

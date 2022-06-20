@@ -45,11 +45,11 @@ func (s *sOauth) Authorization(ctx context.Context, subject string, issueRole st
 		iClaims         *jwt.IssueClaims
 	)
 
+	// 实例化签名
 	iClaims = &jwt.IssueClaims{
 		Subject:   subject,
 		IssueRole: issueRole,
 	}
-
 	// 制作 accessToken
 	if atExpireTime, err = time.ParseDuration(atExpireTimeCfg); err != nil {
 		return nil, err
@@ -58,7 +58,6 @@ func (s *sOauth) Authorization(ctx context.Context, subject string, issueRole st
 	if accessToken, err = pkg.IssueToken(iClaims, atExpireTime); err != nil {
 		return nil, err
 	}
-
 	// 制作 refreshToken
 	if rtExpireTime, err = time.ParseDuration(rtExpireTimeCfg); err != nil {
 		return nil, err
@@ -67,15 +66,16 @@ func (s *sOauth) Authorization(ctx context.Context, subject string, issueRole st
 	if refreshToken, err = pkg.IssueToken(iClaims, rtExpireTime); err != nil {
 		return nil, err
 	}
-
-	// 组装数据
+	// 获取过期秒数
 	expiresIn = currentTime.Add(atExpireTime).Sub(currentTime).Seconds()
+	// 组装返回数据
 	res = &model.TokenOutput{
 		AccessToken:  accessToken,
 		TokenType:    "Bearer",
 		RefreshToken: refreshToken,
 		ExpiresIn:    uint(expiresIn),
 	}
+
 	return res, nil
 }
 
@@ -85,6 +85,8 @@ func (s *sOauth) RefreshAuthorization(ctx context.Context, ticket string) (*mode
 		claims map[string]interface{}
 		err    error
 	)
+
+	// 解析token
 	if claims, err = jwt.NewJwt().ParseToken(ticket); err != nil {
 		return nil, err
 	}
@@ -92,6 +94,7 @@ func (s *sOauth) RefreshAuthorization(ctx context.Context, ticket string) (*mode
 	if claims["ist"] != "renew" {
 		return nil, gerror.New("claims ist not correct.")
 	}
+
 	return s.Authorization(ctx, claims["sub"].(string), claims["isr"].(string))
 }
 
@@ -132,11 +135,13 @@ func (s *sOauth) CheckPath(r *ghttp.Request, issueRole string) (bool, error) {
 		ok    bool
 	)
 
+	// 组装政策数据
 	plicy = &casbin.Policy{
 		Subject: issueRole,
 		Object:  r.URL.Path,
 		Action:  r.Method,
 	}
+	// 验证政策权限
 	if ok, err = casbin.NewCasbin().Verify(plicy); err != nil {
 		return false, err
 	}
@@ -152,31 +157,26 @@ func (s *sOauth) SavePolicy(ctx context.Context) error {
 	var (
 		policys []*casbin.Policy
 		roles   []*casbin.Role
+		arList  []*entity.AuthRule
 		ugList  []*entity.UserGroup
 		ugaList []*entity.UserGroupAccess
 		err     error
+		ruleIds []uint
 	)
 
-	// 组装角色政策
-	if ugList, err = service.User().GetAllGroup(ctx); err != nil {
+	// 组装基础政策
+	if ruleIds, err = service.Auth().GetBasicAccessRuleIds(ctx); err != nil {
 		return err
 	}
-	for _, v := range ugList {
-		if v.ParentId == 0 {
-			roles = append(roles, &casbin.Role{
-				ParentSubject: "root",
-				Subject:       v.Name,
-			})
-		} else {
-			var parentName string
-			if parentName, err = service.User().GetGroupName(ctx, v.ParentId); err != nil {
-				return err
-			}
-			roles = append(roles, &casbin.Role{
-				ParentSubject: parentName,
-				Subject:       v.Name,
-			})
-		}
+	if arList, err = service.Auth().GetRules(ctx, ruleIds); err != nil {
+		return err
+	}
+	for _, v := range arList {
+		policys = append(policys, &casbin.Policy{
+			Subject: "user",
+			Object:  v.Path,
+			Action:  v.Method,
+		})
 	}
 	// 组装节点政策
 	if ugaList, err = service.User().GetAllGroupAccess(ctx); err != nil {
@@ -196,6 +196,27 @@ func (s *sOauth) SavePolicy(ctx context.Context) error {
 			Object:  rule.Path,
 			Action:  rule.Method,
 		})
+	}
+	// 组装用户组政策
+	if ugList, err = service.User().GetAllGroup(ctx); err != nil {
+		return err
+	}
+	for _, v := range ugList {
+		if v.ParentId == 0 {
+			roles = append(roles, &casbin.Role{
+				ParentSubject: "root",
+				Subject:       v.Name,
+			})
+		} else {
+			var parentName string
+			if parentName, err = service.User().GetGroupName(ctx, v.ParentId); err != nil {
+				return err
+			}
+			roles = append(roles, &casbin.Role{
+				ParentSubject: parentName,
+				Subject:       v.Name,
+			})
+		}
 	}
 	// 保存配置文件
 	if err = casbin.NewCasbin().SavePolicyCsv(policys, roles); err != nil {

@@ -122,6 +122,21 @@ func (s *sUser) GetUser(ctx context.Context, userId uint) (*entity.User, error) 
 	return ent, nil
 }
 
+// 获取用户集
+func (s *sUser) GetUsers(ctx context.Context, userIds []uint) ([]*entity.User, error) {
+	var (
+		list []*entity.User
+		err  error
+	)
+
+	// 扫描数据
+	if err = dao.UserGroup.Ctx(ctx).WhereIn("id", userIds).Scan(&list); err != nil {
+		return nil, err
+	}
+
+	return list, nil
+}
+
 // 使用uuid获取用户
 func (s *sUser) GetUserByUuid(ctx context.Context, uuid string) (*entity.User, error) {
 	var (

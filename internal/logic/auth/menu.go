@@ -77,6 +77,38 @@ func (s *sAuth) GetMenu(ctx context.Context, menuId uint) (*entity.AuthMenu, err
 	return ent, nil
 }
 
+// 获取菜单集
+func (s *sAuth) GetMenus(ctx context.Context, menuIds []uint) ([]*entity.AuthMenu, error) {
+	var (
+		m    = dao.AuthMenu.Ctx(ctx)
+		list []*entity.AuthMenu
+		err  error
+	)
+
+	// 扫描数据
+	if err = m.Fields("id").WhereIn("id", menuIds).Scan(&list); err != nil {
+		return nil, err
+	}
+
+	return list, nil
+}
+
+// 获取所有菜单
+func (s *sAuth) GetAllMenu(ctx context.Context) ([]*entity.AuthMenu, error) {
+	var (
+		list []*entity.AuthMenu
+		err  error
+	)
+
+	if err = dao.AuthMenu.Ctx(ctx).Where(do.AuthMenu{
+		Status: "normal",
+	}).Scan(&list); err != nil {
+		return nil, err
+	}
+
+	return list, nil
+}
+
 // 修改菜单
 func (s *sAuth) UpdateMenu(ctx context.Context, in *model.AuthMenuUpdateInput) (*entity.AuthMenu, error) {
 	var (
@@ -158,22 +190,6 @@ func (s *sAuth) DeleteMenu(ctx context.Context, menuId uint) error {
 		_, err = dao.AuthMenu.Ctx(ctx).WhereIn("id", ids).Delete()
 		return err
 	})
-}
-
-// 获取所有分组
-func (s *sAuth) GetAllMenu(ctx context.Context) ([]*entity.AuthMenu, error) {
-	var (
-		list []*entity.AuthMenu
-		err  error
-	)
-
-	if err = dao.AuthMenu.Ctx(ctx).Where(do.AuthMenu{
-		Status: "normal",
-	}).Scan(&list); err != nil {
-		return nil, err
-	}
-
-	return list, nil
 }
 
 // 获取菜单树数据
