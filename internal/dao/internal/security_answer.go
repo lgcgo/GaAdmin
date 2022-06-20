@@ -10,56 +10,62 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// AuthRoleAccessDao is the data access object for table auth_role_access.
-type AuthRoleAccessDao struct {
+// SecurityAnswerDao is the data access object for table security_answer.
+type SecurityAnswerDao struct {
 	table   string                // table is the underlying table name of the DAO.
 	group   string                // group is the database configuration group name of current DAO.
-	columns AuthRoleAccessColumns // columns contains all the column names of Table for convenient usage.
+	columns SecurityAnswerColumns // columns contains all the column names of Table for convenient usage.
 }
 
-// AuthRoleAccessColumns defines and stores column names for table auth_role_access.
-type AuthRoleAccessColumns struct {
-	RoleId string // 角色ID
-	RuleId string // 规则ID
+// SecurityAnswerColumns defines and stores column names for table security_answer.
+type SecurityAnswerColumns struct {
+	Id       string // ID
+	UserId   string // 用户ID
+	Question string // 问题
+	Content  string // 内容
+	CreateAt string // 创建日期
 }
 
-//  authRoleAccessColumns holds the columns for table auth_role_access.
-var authRoleAccessColumns = AuthRoleAccessColumns{
-	RoleId: "role_id",
-	RuleId: "rule_id",
+//  securityAnswerColumns holds the columns for table security_answer.
+var securityAnswerColumns = SecurityAnswerColumns{
+	Id:       "id",
+	UserId:   "user_id",
+	Question: "question",
+	Content:  "content",
+	CreateAt: "create_at",
 }
 
-// NewAuthRoleAccessDao creates and returns a new DAO object for table data access.
-func NewAuthRoleAccessDao() *AuthRoleAccessDao {
-	return &AuthRoleAccessDao{
+// NewSecurityAnswerDao creates and returns a new DAO object for table data access.
+func NewSecurityAnswerDao() *SecurityAnswerDao {
+	return &SecurityAnswerDao{
 		group:   "default",
-		table:   "auth_role_access",
-		columns: authRoleAccessColumns,
+		table:   "security_answer",
+		columns: securityAnswerColumns,
 	}
 }
 
 // DB retrieves and returns the underlying raw database management object of current DAO.
-func (dao *AuthRoleAccessDao) DB() gdb.DB {
+func (dao *SecurityAnswerDao) DB() gdb.DB {
 	return g.DB(dao.group)
 }
 
 // Table returns the table name of current dao.
-func (dao *AuthRoleAccessDao) Table() string {
+func (dao *SecurityAnswerDao) Table() string {
 	return dao.table
 }
 
 // Columns returns all column names of current dao.
-func (dao *AuthRoleAccessDao) Columns() AuthRoleAccessColumns {
+func (dao *SecurityAnswerDao) Columns() SecurityAnswerColumns {
 	return dao.columns
 }
 
 // Group returns the configuration group name of database of current dao.
-func (dao *AuthRoleAccessDao) Group() string {
+func (dao *SecurityAnswerDao) Group() string {
 	return dao.group
 }
 
 // Ctx creates and returns the Model for current DAO, It automatically sets the context for current operation.
-func (dao *AuthRoleAccessDao) Ctx(ctx context.Context) *gdb.Model {
+func (dao *SecurityAnswerDao) Ctx(ctx context.Context) *gdb.Model {
 	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
 }
 
@@ -69,6 +75,6 @@ func (dao *AuthRoleAccessDao) Ctx(ctx context.Context) *gdb.Model {
 //
 // Note that, you should not Commit or Rollback the transaction in function f
 // as it is automatically handled by this function.
-func (dao *AuthRoleAccessDao) Transaction(ctx context.Context, f func(ctx context.Context, tx *gdb.TX) error) (err error) {
+func (dao *SecurityAnswerDao) Transaction(ctx context.Context, f func(ctx context.Context, tx *gdb.TX) error) (err error) {
 	return dao.Ctx(ctx).Transaction(ctx, f)
 }

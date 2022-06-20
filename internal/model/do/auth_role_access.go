@@ -11,6 +11,6 @@ import (
 // AuthRoleAccess is the golang structure of table auth_role_access for DAO operations like Where/Data.
 type AuthRoleAccess struct {
 	g.Meta `orm:"table:auth_role_access, do:true"`
-	RoleId interface{} // 用户组ID
-	RuleId interface{} // 权限规则ID
+	RoleId interface{} // 角色ID
+	RuleId interface{} // 规则ID
 }

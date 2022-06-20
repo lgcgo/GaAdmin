@@ -6,6 +6,6 @@ package entity
 
 // AuthRoleAccess is the golang structure for table auth_role_access.
 type AuthRoleAccess struct {
-	RoleId uint `json:"roleId" ` // 用户组ID
-	RuleId uint `json:"ruleId" ` // 权限规则ID
+	RoleId uint `json:"roleId" ` // 角色ID
+	RuleId uint `json:"ruleId" ` // 规则ID
 }
