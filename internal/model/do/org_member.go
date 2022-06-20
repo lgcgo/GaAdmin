@@ -14,10 +14,9 @@ type OrgMember struct {
 	g.Meta       `orm:"table:org_member, do:true"`
 	Id           interface{} // ID
 	UserId       interface{} // 用户ID
-	OrgId        interface{} // 公司ID
 	Realname     interface{} // 真实名称
 	No           interface{} // 工号
-	InitPassword interface{} //
+	InitPassword interface{} // 初始密码
 	Status       interface{} // 状态
 	CreateAt     *gtime.Time // 创建日期
 	UpdateAt     *gtime.Time // 更新日期

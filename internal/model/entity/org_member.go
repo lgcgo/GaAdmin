@@ -12,10 +12,9 @@ import (
 type OrgMember struct {
 	Id           uint        `json:"id"           ` // ID
 	UserId       uint        `json:"userId"       ` // 用户ID
-	OrgId        uint        `json:"orgId"        ` // 公司ID
 	Realname     string      `json:"realname"     ` // 真实名称
 	No           string      `json:"no"           ` // 工号
-	InitPassword string      `json:"initPassword" ` //
+	InitPassword string      `json:"initPassword" ` // 初始密码
 	Status       string      `json:"status"       ` // 状态
 	CreateAt     *gtime.Time `json:"createAt"     ` // 创建日期
 	UpdateAt     *gtime.Time `json:"updateAt"     ` // 更新日期

@@ -21,10 +21,9 @@ type OrgMemberDao struct {
 type OrgMemberColumns struct {
 	Id           string // ID
 	UserId       string // 用户ID
-	OrgId        string // 公司ID
 	Realname     string // 真实名称
 	No           string // 工号
-	InitPassword string //
+	InitPassword string // 初始密码
 	Status       string // 状态
 	CreateAt     string // 创建日期
 	UpdateAt     string // 更新日期
@@ -34,7 +33,6 @@ type OrgMemberColumns struct {
 var orgMemberColumns = OrgMemberColumns{
 	Id:           "id",
 	UserId:       "user_id",
-	OrgId:        "org_id",
 	Realname:     "realname",
 	No:           "no",
 	InitPassword: "init_password",

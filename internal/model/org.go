@@ -18,10 +18,11 @@ type OrgDepartmentUpdateInput struct {
 	Weigh        uint
 }
 
-// 成员管理
+/**
+* 成员管理
+**/
 type OrgMemberCreateInput struct {
 	UserId       uint
-	OrgId        uint
 	Realname     string
 	InitPassword string
 	No           string
@@ -31,6 +32,7 @@ type OrgMemberUpdateInput struct {
 	Realname     string
 	InitPassword string
 	No           string
+	Status       string
 }
 type OrgMemberPageOutput struct {
 	List []*entity.OrgMember

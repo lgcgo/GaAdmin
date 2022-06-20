@@ -68,19 +68,19 @@ type OrgDepartmentTreeRes struct {
 **/
 // 返回的数据项
 type OrgMemberResData struct {
-	Id       uint   `json:"memberId"`              // 成员ID
-	OrgId    uint   `json:"orgId" v:"required"`    // 公司ID
-	Realname string `json:"realname" v:"required"` // 真实名称
-	No       string `json:"no"`                    // 工号
-	Status   string `json:"status"`                // 状态
+	Id           uint   `json:"memberId"`              // 成员ID
+	Realname     string `json:"realname" v:"required"` // 真实名称
+	InitPassword string `json:"initPassword"`          // 初始密码
+	No           string `json:"no"`                    // 工号
+	Status       string `json:"status"`                // 状态
 }
 
 // 创建成员
 type OrgMemberCreateReq struct {
-	g.Meta   `path:"/org/member" method:"post" tags:"OrgService" summary:"Create member"`
-	OrgId    uint   `json:"orgId" v:"required"`    // 公司ID
-	Realname string `json:"realname" v:"required"` // 真实名称
-	No       string `json:"no"`                    // 工号
+	g.Meta       `path:"/org/member" method:"post" tags:"OrgService" summary:"Create member"`
+	Realname     string `json:"realname" v:"required"` // 真实名称
+	InitPassword string `json:"initPassword"`          // 初始密码
+	No           string `json:"no"`                    // 工号
 }
 type OrgMemberCreateRes struct {
 	OrgMemberResData
