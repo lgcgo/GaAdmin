@@ -24,11 +24,6 @@ type IOrg interface {
 	UpdateMember(ctx context.Context, in *model.OrgMemberUpdateInput) (*entity.OrgMember, error)
 	DeleteMember(ctx context.Context, id uint) error
 	GetMemberPage(ctx context.Context, in *model.Page) (*model.OrgMemberPageOutput, error)
-	CreateOrg(ctx context.Context, in *model.OrgCreateInput) (*entity.Org, error)
-	GetOrg(ctx context.Context, orgId uint) (*entity.Org, error)
-	UpdateOrg(ctx context.Context, in *model.OrgUpdateInput) (*entity.Org, error)
-	DeleteOrg(ctx context.Context, id uint) error
-	GetOrgPage(ctx context.Context, in *model.Page) (*model.OrgPageOutput, error)
 }
 
 var localOrg IOrg
