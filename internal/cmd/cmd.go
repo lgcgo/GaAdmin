@@ -32,6 +32,7 @@ var (
 					controller.AuthRule,        // 权限规则
 					controller.AuthMenu,        // 权限菜单
 					controller.Org,             // 组织机构
+					controller.OrgDepartment,   // 组织部门
 					controller.OrgMember,       // 组织成员
 					controller.User,            // 用户
 					controller.UserGroup,       // 用户分组

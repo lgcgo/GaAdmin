@@ -70,6 +70,67 @@ type OrgListRes struct {
 }
 
 /**
+*  组织部门
+**/
+// 部门返回数据
+type OrgDepartmentResData struct {
+	Id       uint   `json:"departmentId"`
+	ParentId uint   `json:"parentId"`
+	Name     string `json:"name"`
+	Title    string `json:"title"`
+	Weigh    uint   `json:"weigh"`
+}
+
+// 创建部门
+type OrgDepartmentCreateReq struct {
+	g.Meta   `path:"/org/department" tags:"OrgService" method:"post" summary:"Create department"`
+	ParentId uint   `json:"parentId" v:"required"`
+	Name     string `json:"name" v:"required"`
+	Title    string `json:"title" v:"required"`
+	Weigh    uint   `json:"weigh"`
+}
+type OrgDepartmentCreateRes struct {
+	OrgDepartmentResData
+}
+
+// 获取部门
+type OrgDepartmentGetReq struct {
+	g.Meta       `path:"/org/department" tags:"OrgService" method:"get" summary:"Get department"`
+	DepartmentId uint `json:"departmentId" v:"required"`
+}
+type OrgDepartmentGetRes struct {
+	OrgDepartmentResData
+}
+
+// 更新部门
+type OrgDepartmentUpdateReq struct {
+	g.Meta       `path:"/org/department" tags:"OrgService" method:"put" summary:"Update department"`
+	DepartmentId uint   `json:"departmentId" v:"required"`
+	ParentId     uint   `json:"parentId" v:"required"`
+	Title        string `json:"title" v:"required"`
+	Weigh        uint   `json:"weigh"`
+}
+type OrgDepartmentUpdateRes struct {
+	OrgDepartmentResData
+}
+
+// 删除部门
+type OrgDepartmentDeleteReq struct {
+	g.Meta       `path:"/org/department" tags:"OrgService" method:"delete" summary:"Delete department"`
+	DepartmentId uint `json:"departmentId" v:"required"`
+}
+type OrgDepartmentDeleteRes struct {
+}
+
+// 获取部门树
+type OrgDepartmentTreeReq struct {
+	g.Meta `path:"/org/department-tree" tags:"OrgService" method:"get" summary:"Get department tree"`
+}
+type OrgDepartmentTreeRes struct {
+	TreeResData
+}
+
+/**
 * 组织成员
 **/
 // 返回的数据项

@@ -46,3 +46,19 @@ type OrgMemberSignNoInput struct {
 	Password string
 	Captcha  string
 }
+
+/**
+* 分组管理
+**/
+type OrgDepartmentCreateInput struct {
+	ParentId uint
+	Title    string
+	Weigh    uint
+}
+
+type OrgDepartmentUpdateInput struct {
+	DepartmentId uint
+	ParentId     uint
+	Title        string
+	Weigh        uint
+}

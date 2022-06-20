@@ -11,6 +11,14 @@ import (
 )
 
 type IOrg interface {
+	CreateDepartment(ctx context.Context, in *model.OrgDepartmentCreateInput) (*entity.OrgDepartment, error)
+	GetDepartment(ctx context.Context, departmentId uint) (*entity.OrgDepartment, error)
+	UpdateDepartment(ctx context.Context, in *model.OrgDepartmentUpdateInput) (*entity.OrgDepartment, error)
+	DeleteDepartment(ctx context.Context, departmentId uint) error
+	GetAllDepartment(ctx context.Context) ([]*entity.OrgDepartment, error)
+	GetDepartmentTreeData(ctx context.Context) (*model.TreeDataOutput, error)
+	GetDepartmentChildrenIDs(ctx context.Context, departmentId uint) ([]uint, error)
+	CheckDepartmentIds(ctx context.Context, departmentIds []uint) ([]uint, error)
 	CreateMember(ctx context.Context, in *model.OrgMemberCreateInput) (*entity.OrgMember, error)
 	GetMember(ctx context.Context, memberId uint) (*entity.OrgMember, error)
 	UpdateMember(ctx context.Context, in *model.OrgMemberUpdateInput) (*entity.OrgMember, error)
