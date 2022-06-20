@@ -1,6 +1,22 @@
 package model
 
 /**
+* 分组管理
+**/
+type AuthRoleCreateInput struct {
+	ParentId uint
+	Name     string
+	Title    string
+}
+
+type AuthRoleUpdateInput struct {
+	RoleId   uint
+	ParentId uint
+	Name     string
+	Title    string
+}
+
+/**
 * 菜单管理
 **/
 type AuthMenuCreateInput struct {

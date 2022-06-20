@@ -8,9 +8,9 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// UserGroupAccess is the golang structure of table user_group_access for DAO operations like Where/Data.
-type UserGroupAccess struct {
-	g.Meta     `orm:"table:user_group_access, do:true"`
-	GroupId    interface{} // 用户组ID
-	AuthRuleId interface{} // 权限规则ID
+// UserAccess is the golang structure of table user_access for DAO operations like Where/Data.
+type UserAccess struct {
+	g.Meta     `orm:"table:user_access, do:true"`
+	UserId     interface{} // 用户ID
+	AuthRoleId interface{} // 权限角色ID
 }

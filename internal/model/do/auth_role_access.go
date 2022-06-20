@@ -8,9 +8,9 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// UserRoles is the golang structure of table user_roles for DAO operations like Where/Data.
-type UserRoles struct {
-	g.Meta  `orm:"table:user_roles, do:true"`
-	UserId  interface{} // 用户ID
-	GroupId interface{} // 用户组ID
+// AuthRoleAccess is the golang structure of table auth_role_access for DAO operations like Where/Data.
+type AuthRoleAccess struct {
+	g.Meta `orm:"table:auth_role_access, do:true"`
+	RoleId interface{} // 用户组ID
+	RuleId interface{} // 权限规则ID
 }

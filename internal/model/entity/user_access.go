@@ -4,8 +4,8 @@
 
 package entity
 
-// UserRoles is the golang structure for table user_roles.
-type UserRoles struct {
-	UserId  uint `json:"userId"  ` // 用户ID
-	GroupId uint `json:"groupId" ` // 用户组ID
+// UserAccess is the golang structure for table user_access.
+type UserAccess struct {
+	UserId     uint `json:"userId"     ` // 用户ID
+	AuthRoleId uint `json:"authRoleId" ` // 权限角色ID
 }

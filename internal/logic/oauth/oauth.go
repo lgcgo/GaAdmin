@@ -155,53 +155,41 @@ func (s *sOauth) CheckPath(r *ghttp.Request, issueRole string) (bool, error) {
 // 更新授权政策
 func (s *sOauth) SavePolicy(ctx context.Context) error {
 	var (
-		policys []*casbin.Policy
-		roles   []*casbin.Role
-		arList  []*entity.AuthRule
-		ugList  []*entity.UserGroup
-		ugaList []*entity.UserGroupAccess
-		err     error
-		ruleIds []uint
+		policys    []*casbin.Policy
+		roles      []*casbin.Role
+		accessList []*entity.AuthRoleAccess
+		roleList   []*entity.AuthRole
+		err        error
 	)
 
-	// 组装基础政策
-	if ruleIds, err = service.Auth().GetBasicAccessRuleIds(ctx); err != nil {
+	// 组装角色权限政策
+	if accessList, err = service.Auth().GetAllRoleAccess(ctx); err != nil {
 		return err
 	}
-	if arList, err = service.Auth().GetRules(ctx, ruleIds); err != nil {
-		return err
-	}
-	for _, v := range arList {
-		policys = append(policys, &casbin.Policy{
-			Subject: "user",
-			Object:  v.Path,
-			Action:  v.Method,
-		})
-	}
-	// 组装节点政策
-	if ugaList, err = service.User().GetAllGroupAccess(ctx); err != nil {
-		return err
-	}
-	for _, v := range ugaList {
+	for _, v := range accessList {
 		var (
-			name string
+			role *entity.AuthRole
 			rule *entity.AuthRule
 		)
-		if name, err = service.User().GetGroupName(ctx, v.GroupId); err != nil {
+
+		if role, err = service.Auth().GetRole(ctx, v.RoleId); err != nil {
 			return err
 		}
-		rule, err = service.Auth().GetRule(ctx, v.AuthRuleId)
+		if rule, err = service.Auth().GetRule(ctx, v.RuleId); err != nil {
+			return err
+		}
 		policys = append(policys, &casbin.Policy{
-			Subject: name,
+			Subject: role.Name,
 			Object:  rule.Path,
 			Action:  rule.Method,
 		})
 	}
-	// 组装用户组政策
-	if ugList, err = service.User().GetAllGroup(ctx); err != nil {
+
+	// 组装角色层级政策
+	if roleList, err = service.Auth().GetAllRole(ctx); err != nil {
 		return err
 	}
-	for _, v := range ugList {
+	for _, v := range roleList {
 		if v.ParentId == 0 {
 			roles = append(roles, &casbin.Role{
 				ParentSubject: "root",
@@ -209,7 +197,7 @@ func (s *sOauth) SavePolicy(ctx context.Context) error {
 			})
 		} else {
 			var parentName string
-			if parentName, err = service.User().GetGroupName(ctx, v.ParentId); err != nil {
+			if parentName, err = service.Auth().GetRoleName(ctx, v.ParentId); err != nil {
 				return err
 			}
 			roles = append(roles, &casbin.Role{

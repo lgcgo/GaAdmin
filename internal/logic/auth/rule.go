@@ -161,7 +161,8 @@ func (s *sAuth) DeleteRule(ctx context.Context, ruleId uint) error {
 		}).Delete(); err != nil {
 			return err
 		}
-		if err = service.User().DeleteGroupAccessByRuleID(ctx, ruleId); err != nil {
+		// 关联删除角色权限数据
+		if err = s.DeleteRoleAccessByRuleID(ctx, ruleId); err != nil {
 			return err
 		}
 		return nil

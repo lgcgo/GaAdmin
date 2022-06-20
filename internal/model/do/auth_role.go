@@ -9,9 +9,9 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// UserGroup is the golang structure of table user_group for DAO operations like Where/Data.
-type UserGroup struct {
-	g.Meta   `orm:"table:user_group, do:true"`
+// AuthRole is the golang structure of table auth_role for DAO operations like Where/Data.
+type AuthRole struct {
+	g.Meta   `orm:"table:auth_role, do:true"`
 	Id       interface{} // ID
 	ParentId interface{} // 父ID
 	Name     interface{} // 名称

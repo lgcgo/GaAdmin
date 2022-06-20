@@ -75,86 +75,16 @@ type UserListRes struct {
 }
 
 /**
-*  用户分组
-**/
-// 分组返回数据
-type UserGroupResData struct {
-	Id       uint   `json:"groupId"`
-	ParentId uint   `json:"parentId"`
-	Name     string `json:"name"`
-	Title    string `json:"title"`
-}
-
-// 创建分组
-type UserGroupCreateReq struct {
-	g.Meta   `path:"/user/group" tags:"UserService" method:"post" summary:"Create group"`
-	ParentId uint   `json:"parentId" v:"required"`
-	Name     string `json:"name" v:"required"`
-	Title    string `json:"title" v:"required"`
-}
-type UserGroupCreateRes struct {
-	UserGroupResData
-}
-
-// 获取分组
-type UserGroupGetReq struct {
-	g.Meta  `path:"/user/group" tags:"UserService" method:"get" summary:"Get group"`
-	GroupId uint `json:"groupId" v:"required"`
-}
-type UserGroupGetRes struct {
-	UserGroupResData
-}
-
-// 更新分组
-type UserGroupUpdateReq struct {
-	g.Meta   `path:"/user/group" tags:"UserService" method:"put" summary:"Update group"`
-	GroupId  uint   `json:"groupId" v:"required"`
-	ParentId uint   `json:"parentId" v:"required"`
-	Name     string `json:"name" v:"required"`
-	Title    string `json:"title" v:"required"`
-}
-type UserGroupUpdateRes struct {
-	UserGroupResData
-}
-
-// 删除分组
-type UserGroupDeleteReq struct {
-	g.Meta  `path:"/user/group" tags:"UserService" method:"delete" summary:"Delete group"`
-	GroupId uint `json:"groupId" v:"required"`
-}
-type UserGroupDeleteRes struct {
-}
-
-// 获取分组树
-type UserGroupTreeReq struct {
-	g.Meta `path:"/user/group-tree" tags:"UserService" method:"get" summary:"Get group tree"`
-}
-type UserGroupTreeRes struct {
-	TreeResData
-}
-
-// 设置分组权限
-type UserGroupAccessSetupReq struct {
-	g.Meta      `path:"/user/group-access" tags:"UserService" method:"post" summary:"Setup group access"`
-	GroupId     uint   `json:"groupId" v:"required"`
-	AuthRuleIds []uint `json:"authRuleIds" v:"required"`
-}
-type UserGroupAccessSetupRes struct {
-	GroupId     uint   `json:"groupId"`
-	AuthRuleIds []uint `json:"authRuleIds"`
-}
-
-/**
 * 用户角色
 **/
-type UserRolesSetupReq struct {
-	g.Meta   `path:"/user/roles" tags:"UserService" method:"post" summary:"Setup roles"`
-	UserId   uint   `json:"userId" v:"required"`
-	GroupIds []uint `json:"groupIds"`
+type UserAccessSetupReq struct {
+	g.Meta  `path:"/user/roles" tags:"UserService" method:"post" summary:"Setup roles"`
+	UserId  uint   `json:"userId" v:"required"`
+	RoleIds []uint `json:"roleIds"`
 }
-type UserRolesSetupRes struct {
-	UserId   uint   `json:"userId"`
-	GroupIds []uint `json:"groupIds"`
+type UserAccessSetupRes struct {
+	UserId  uint   `json:"userId"`
+	RoleIds []uint `json:"roleIds"`
 }
 
 /**

@@ -21,7 +21,7 @@ func (s *sOrg) CreateMember(ctx context.Context, in *model.OrgMemberCreateInput)
 	)
 
 	// 检测会员ID
-	if available, err = s.isMemberUserIdAvailable(ctx, in.OrgId, in.UserId); err != nil {
+	if available, err = s.isMemberUserIdAvailable(ctx, in.UserId); err != nil {
 		return nil, err
 	}
 	if !available {
@@ -30,7 +30,7 @@ func (s *sOrg) CreateMember(ctx context.Context, in *model.OrgMemberCreateInput)
 
 	// 验证成员编号，如果有
 	if len(in.No) > 0 {
-		if available, err = s.isMemberNoAvailable(ctx, in.OrgId, in.No); err != nil {
+		if available, err = s.isMemberNoAvailable(ctx, in.No); err != nil {
 			return nil, err
 		}
 		if !available {
@@ -46,7 +46,7 @@ func (s *sOrg) CreateMember(ctx context.Context, in *model.OrgMemberCreateInput)
 	if err = gconv.Struct(in, &data); err != nil {
 		return nil, err
 	}
-	data.Status = "normal"
+
 	if err = dao.OrgMember.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
 		insertId, err = dao.OrgMember.Ctx(ctx).Data(data).InsertAndGetId()
 		return err
@@ -95,7 +95,7 @@ func (s *sOrg) UpdateMember(ctx context.Context, in *model.OrgMemberUpdateInput)
 	}
 	// 验证成员编号，如果有
 	if len(in.No) > 0 {
-		if available, err = s.isMemberNoAvailable(ctx, ent.OrgId, in.No, []uint{ent.Id}...); err != nil {
+		if available, err = s.isMemberNoAvailable(ctx, in.No, []uint{ent.Id}...); err != nil {
 			return nil, err
 		}
 		if !available {
@@ -179,7 +179,7 @@ func (s *sOrg) GetMemberPage(ctx context.Context, in *model.Page) (*model.OrgMem
 }
 
 // 检测成员编号
-func (s *sOrg) isMemberUserIdAvailable(ctx context.Context, orgId uint, userId uint, notIds ...uint) (bool, error) {
+func (s *sOrg) isMemberUserIdAvailable(ctx context.Context, userId uint, notIds ...uint) (bool, error) {
 	var (
 		m     = dao.OrgMember.Ctx(ctx)
 		count int
@@ -191,7 +191,6 @@ func (s *sOrg) isMemberUserIdAvailable(ctx context.Context, orgId uint, userId u
 		m = m.WhereNot(dao.OrgMember.Columns().Id, v)
 	}
 	if count, err = m.Where(do.OrgMember{
-		OrgId:  orgId,
 		UserId: userId,
 	}).Count(); err != nil {
 		return false, err
@@ -201,7 +200,7 @@ func (s *sOrg) isMemberUserIdAvailable(ctx context.Context, orgId uint, userId u
 }
 
 // 检测成员编号
-func (s *sOrg) isMemberNoAvailable(ctx context.Context, orgId uint, no string, notIds ...uint) (bool, error) {
+func (s *sOrg) isMemberNoAvailable(ctx context.Context, no string, notIds ...uint) (bool, error) {
 	var (
 		m     = dao.OrgMember.Ctx(ctx)
 		count int
@@ -213,8 +212,7 @@ func (s *sOrg) isMemberNoAvailable(ctx context.Context, orgId uint, no string, n
 		m = m.WhereNot(dao.OrgMember.Columns().Id, v)
 	}
 	if count, err = m.Where(do.OrgMember{
-		OrgId: orgId,
-		No:    no,
+		No: no,
 	}).Count(); err != nil {
 		return false, err
 	}

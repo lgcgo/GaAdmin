@@ -11,23 +11,12 @@ import (
 )
 
 type IUser interface {
-	CreateGroup(ctx context.Context, in *model.UserGroupCreateInput) (*entity.UserGroup, error)
-	GetGroup(ctx context.Context, groupId uint) (*entity.UserGroup, error)
-	UpdateGroup(ctx context.Context, in *model.UserGroupUpdateInput) (*entity.UserGroup, error)
-	DeleteGroup(ctx context.Context, groupId uint) error
-	GetAllGroup(ctx context.Context) ([]*entity.UserGroup, error)
-	GetGroupTreeData(ctx context.Context) (*model.TreeDataOutput, error)
-	GetGroupName(ctx context.Context, gourpID uint) (string, error)
-	GetGroupChildrenIDs(ctx context.Context, groupId uint) ([]uint, error)
-	CheckGroupIds(ctx context.Context, groupIds []uint) ([]uint, error)
-	SetupGroupAccess(ctx context.Context, groupId uint, auth_rule_ids []uint) error
-	DeleteGroupAccessByRuleID(ctx context.Context, ruleId uint) error
-	GetAllGroupAccess(ctx context.Context) ([]*entity.UserGroupAccess, error)
-	SetupRoles(ctx context.Context, userId uint, group_ids []uint) error
-	DeleteRolesByGroupId(ctx context.Context, groupId uint) error
-	GetAllRoles(ctx context.Context) ([]*entity.UserRoles, error)
+	SetupRoles(ctx context.Context, userId uint, role_ids []uint) error
+	DeleteRolesByGroupId(ctx context.Context, roleId uint) error
+	GetAllRoles(ctx context.Context) ([]*entity.UserAccess, error)
 	CreateUser(ctx context.Context, in *model.UserCreateInput) (*entity.User, error)
 	GetUser(ctx context.Context, userId uint) (*entity.User, error)
+	GetUsers(ctx context.Context, userIds []uint) ([]*entity.User, error)
 	GetUserByUuid(ctx context.Context, uuid string) (*entity.User, error)
 	UpdateUser(ctx context.Context, in *model.UserUpdateInput) (*entity.User, error)
 	DeleteUser(ctx context.Context, id uint) error

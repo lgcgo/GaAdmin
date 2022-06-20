@@ -19,9 +19,9 @@ func (c *cUserReset) ResetMobile(ctx context.Context, req *v1.UserResetMobileReq
 }
 
 // 使用邮件验证码重置
-func (c *cUserReset) ResetEmail(ctx context.Context, req *v1.UserResetMobileReq) (*v1.UserResetMobileRes, error) {
+func (c *cUserReset) ResetEmail(ctx context.Context, req *v1.UserResetEmailReq) (*v1.UserResetEmailRes, error) {
 	var (
-		res *v1.UserResetMobileRes
+		res *v1.UserResetEmailRes
 	)
 
 	return res, nil

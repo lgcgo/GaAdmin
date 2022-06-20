@@ -3,6 +3,76 @@ package v1
 import "github.com/gogf/gf/v2/frame/g"
 
 /**
+*  权限角色
+**/
+// 返回角色数据
+type AuthRoleResData struct {
+	Id       uint   `json:"roleId"`
+	ParentId uint   `json:"parentId"`
+	Name     string `json:"name"`
+	Title    string `json:"title"`
+}
+
+// 创建角色
+type AuthRoleCreateReq struct {
+	g.Meta   `path:"/auth/role" tags:"UserService" method:"post" summary:"Create group"`
+	ParentId uint   `json:"parentId" v:"required"`
+	Name     string `json:"name" v:"required"`
+	Title    string `json:"title" v:"required"`
+}
+type AuthRoleCreateRes struct {
+	AuthRoleResData
+}
+
+// 获取角色
+type AuthRoleGetReq struct {
+	g.Meta `path:"/auth/role" tags:"UserService" method:"get" summary:"Get group"`
+	RoleId uint `json:"roleId" v:"required"`
+}
+type AuthRoleGetRes struct {
+	AuthRoleResData
+}
+
+// 更新角色
+type AuthRoleUpdateReq struct {
+	g.Meta   `path:"/auth/role" tags:"UserService" method:"put" summary:"Update group"`
+	RoleId   uint   `json:"roleId" v:"required"`
+	ParentId uint   `json:"parentId" v:"required"`
+	Name     string `json:"name" v:"required"`
+	Title    string `json:"title" v:"required"`
+}
+type AuthRoleUpdateRes struct {
+	AuthRoleResData
+}
+
+// 删除角色
+type AuthRoleDeleteReq struct {
+	g.Meta `path:"/auth/role" tags:"UserService" method:"delete" summary:"Delete group"`
+	RoleId uint `json:"roleId" v:"required"`
+}
+type AuthRoleDeleteRes struct {
+}
+
+// 获取角色树
+type AuthRoleTreeReq struct {
+	g.Meta `path:"/auth/role-tree" tags:"UserService" method:"get" summary:"Get group tree"`
+}
+type AuthRoleTreeRes struct {
+	TreeResData
+}
+
+// 设置角色权限
+type AuthRoleAccessSetupReq struct {
+	g.Meta      `path:"/auth/role-access" tags:"UserService" method:"post" summary:"Setup group access"`
+	RoleId      uint   `json:"roleId" v:"required"`
+	AuthRuleIds []uint `json:"authRuleIds" v:"required"`
+}
+type AuthRoleAccessSetupRes struct {
+	RoleId      uint   `json:"roleId"`
+	AuthRuleIds []uint `json:"authRuleIds"`
+}
+
+/**
 * 基础权限
 **/
 // 设置基础权限

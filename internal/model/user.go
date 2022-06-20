@@ -39,19 +39,3 @@ type UserSignMobile struct {
 	Mobile  string
 	Captcha string
 }
-
-/**
-* 分组管理
-**/
-type UserGroupCreateInput struct {
-	ParentId uint
-	Name     string
-	Title    string
-}
-
-type UserGroupUpdateInput struct {
-	GroupId  uint
-	ParentId uint
-	Name     string
-	Title    string
-}

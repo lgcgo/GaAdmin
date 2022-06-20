@@ -8,8 +8,8 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// UserGroup is the golang structure for table user_group.
-type UserGroup struct {
+// AuthRole is the golang structure for table auth_role.
+type AuthRole struct {
 	Id       uint        `json:"id"       ` // ID
 	ParentId uint        `json:"parentId" ` // 父ID
 	Name     string      `json:"name"     ` // 名称

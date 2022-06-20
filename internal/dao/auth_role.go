@@ -8,19 +8,19 @@ import (
 	"GaAdmin/internal/dao/internal"
 )
 
-// internalUserRolesDao is internal type for wrapping internal DAO implements.
-type internalUserRolesDao = *internal.UserRolesDao
+// internalAuthRoleDao is internal type for wrapping internal DAO implements.
+type internalAuthRoleDao = *internal.AuthRoleDao
 
-// userRolesDao is the data access object for table user_roles.
+// authRoleDao is the data access object for table auth_role.
 // You can define custom methods on it to extend its functionality as you wish.
-type userRolesDao struct {
-	internalUserRolesDao
+type authRoleDao struct {
+	internalAuthRoleDao
 }
 
 var (
-	// UserRoles is globally public accessible object for table user_roles operations.
-	UserRoles = userRolesDao{
-		internal.NewUserRolesDao(),
+	// AuthRole is globally public accessible object for table auth_role operations.
+	AuthRole = authRoleDao{
+		internal.NewAuthRoleDao(),
 	}
 )
 

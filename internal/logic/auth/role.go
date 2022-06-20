@@ -1,4 +1,4 @@
-package user
+package auth
 
 import (
 	"GaAdmin/internal/dao"
@@ -16,11 +16,11 @@ import (
 	"github.com/lgcgo/tree"
 )
 
-// 创建分组
-func (s *sUser) CreateGroup(ctx context.Context, in *model.UserGroupCreateInput) (*entity.UserGroup, error) {
+// 创建角色
+func (s *sAuth) CreateRole(ctx context.Context, in *model.AuthRoleCreateInput) (*entity.AuthRole, error) {
 	var (
-		data      *do.UserGroup
-		ent       *entity.UserGroup
+		data      *do.AuthRole
+		ent       *entity.AuthRole
 		err       error
 		available bool
 		insertId  int64
@@ -28,14 +28,14 @@ func (s *sUser) CreateGroup(ctx context.Context, in *model.UserGroupCreateInput)
 
 	// 检测父级
 	if in.ParentId > 0 {
-		var parent *entity.UserGroup
-		parent, err = s.GetGroup(ctx, in.ParentId)
+		var parent *entity.AuthRole
+		parent, err = s.GetRole(ctx, in.ParentId)
 		if parent == nil {
 			return nil, gerror.Newf("parent is not exists: %d", in.ParentId)
 		}
 	}
-	// 路径防重
-	if available, err = s.isGroupNameAvailable(ctx, in.Name); err != nil {
+	// 名称防重
+	if available, err = s.isRoleNameAvailable(ctx, in.Name); err != nil {
 		return nil, err
 	}
 	if !available {
@@ -46,8 +46,8 @@ func (s *sUser) CreateGroup(ctx context.Context, in *model.UserGroupCreateInput)
 		return nil, err
 	}
 	// 创建实体
-	if err = dao.UserGroup.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
-		insertId, err = dao.UserGroup.Ctx(ctx).Data(data).InsertAndGetId()
+	if err = dao.AuthRole.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
+		insertId, err = dao.AuthRole.Ctx(ctx).Data(data).InsertAndGetId()
 		return err
 	}); err != nil {
 		return nil, err
@@ -55,21 +55,21 @@ func (s *sUser) CreateGroup(ctx context.Context, in *model.UserGroupCreateInput)
 	// 更新授权政策
 	service.Oauth().SavePolicy(ctx)
 	// 获取实体
-	ent, _ = s.GetGroup(ctx, uint(insertId))
+	ent, _ = s.GetRole(ctx, uint(insertId))
 
 	return ent, nil
 }
 
 // 获取组织
-func (s *sUser) GetGroup(ctx context.Context, groupId uint) (*entity.UserGroup, error) {
+func (s *sAuth) GetRole(ctx context.Context, roleId uint) (*entity.AuthRole, error) {
 	var (
-		ent *entity.UserGroup
+		ent *entity.AuthRole
 		err error
 	)
 
 	// 扫描数据
-	if err = dao.UserGroup.Ctx(ctx).Where(do.UserGroup{
-		Id: groupId,
+	if err = dao.AuthRole.Ctx(ctx).Where(do.AuthRole{
+		Id: roleId,
 	}).Scan(&ent); err != nil {
 		return nil, err
 	}
@@ -77,33 +77,33 @@ func (s *sUser) GetGroup(ctx context.Context, groupId uint) (*entity.UserGroup, 
 	return ent, nil
 }
 
-// 修改分组
-func (s *sUser) UpdateGroup(ctx context.Context, in *model.UserGroupUpdateInput) (*entity.UserGroup, error) {
+// 修改角色
+func (s *sAuth) UpdateRole(ctx context.Context, in *model.AuthRoleUpdateInput) (*entity.AuthRole, error) {
 	var (
-		data      *do.UserGroup
-		ent       *entity.UserGroup
+		data      *do.AuthRole
+		ent       *entity.AuthRole
 		err       error
 		available bool
 	)
 
 	// 扫描数据
-	if ent, err = s.GetGroup(ctx, in.GroupId); err != nil {
+	if ent, err = s.GetRole(ctx, in.RoleId); err != nil {
 		return nil, err
 	}
 	if ent == nil {
-		return nil, gerror.Newf("group is not exists: %d", in.GroupId)
+		return nil, gerror.Newf("role is not exists: %d", in.RoleId)
 	}
 	// 检测父级
 	if in.ParentId > 0 {
 		var (
-			parent *entity.UserGroup
+			parent *entity.AuthRole
 			ids    []uint
 		)
-		parent, err = s.GetGroup(ctx, in.ParentId)
+		parent, err = s.GetRole(ctx, in.ParentId)
 		if parent == nil {
 			return nil, gerror.Newf("parent is not exists: %d", in.ParentId)
 		}
-		if ids, err = s.GetGroupChildrenIDs(ctx, in.GroupId); err != nil {
+		if ids, err = s.GetRoleChildrenIDs(ctx, in.RoleId); err != nil {
 			return nil, err
 		}
 		for _, v := range ids {
@@ -113,7 +113,7 @@ func (s *sUser) UpdateGroup(ctx context.Context, in *model.UserGroupUpdateInput)
 		}
 	}
 	// 名称防重
-	if available, err = s.isGroupNameAvailable(ctx, in.Name, []uint{ent.Id}...); err != nil {
+	if available, err = s.isRoleNameAvailable(ctx, in.Name, []uint{ent.Id}...); err != nil {
 		return nil, err
 	}
 	if !available {
@@ -124,9 +124,9 @@ func (s *sUser) UpdateGroup(ctx context.Context, in *model.UserGroupUpdateInput)
 		return nil, err
 	}
 	// 更新实体
-	if err = dao.UserGroup.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
-		_, err = dao.UserGroup.Ctx(ctx).Where(do.UserGroup{
-			Id: in.GroupId,
+	if err = dao.AuthRole.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
+		_, err = dao.AuthRole.Ctx(ctx).Where(do.AuthRole{
+			Id: in.RoleId,
 		}).Data(data).Update()
 		return err
 	}); err != nil {
@@ -135,33 +135,33 @@ func (s *sUser) UpdateGroup(ctx context.Context, in *model.UserGroupUpdateInput)
 	// 更新授权政策
 	service.Oauth().SavePolicy(ctx)
 	// 获取实体
-	ent, _ = s.GetGroup(ctx, in.GroupId)
+	ent, _ = s.GetRole(ctx, in.RoleId)
 
 	return ent, nil
 }
 
-// 删除分组(硬删除)
-func (s *sUser) DeleteGroup(ctx context.Context, groupId uint) error {
+// 删除角色(硬删除)
+func (s *sAuth) DeleteRole(ctx context.Context, roleId uint) error {
 	var (
-		ent *entity.UserGroup
+		ent *entity.AuthRole
 		err error
 		ids []uint
 	)
 
 	// 扫描数据
-	if ent, err = s.GetGroup(ctx, groupId); err != nil {
+	if ent, err = s.GetRole(ctx, roleId); err != nil {
 		return err
 	}
 	if ent == nil {
-		return gerror.Newf("group is not exists: %d", groupId)
+		return gerror.Newf("role is not exists: %d", roleId)
 	}
 	// 获取子ID集
-	if ids, err = s.GetGroupChildrenIDs(ctx, groupId); err != nil {
+	if ids, err = s.GetRoleChildrenIDs(ctx, roleId); err != nil {
 		return err
 	}
 	// 删除实体
-	if err = dao.UserGroup.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
-		_, err = dao.UserGroup.Ctx(ctx).WhereIn("id", ids).Delete()
+	if err = dao.AuthRole.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
+		_, err = dao.AuthRole.Ctx(ctx).WhereIn("id", ids).Delete()
 		return err
 	}); err != nil {
 		return err
@@ -172,30 +172,28 @@ func (s *sUser) DeleteGroup(ctx context.Context, groupId uint) error {
 	return nil
 }
 
-// 获取所有分组
-func (s *sUser) GetAllGroup(ctx context.Context) ([]*entity.UserGroup, error) {
+// 获取所有角色
+func (s *sAuth) GetAllRole(ctx context.Context) ([]*entity.AuthRole, error) {
 	var (
-		list []*entity.UserGroup
+		list []*entity.AuthRole
 		err  error
 	)
 
-	if err = dao.UserGroup.Ctx(ctx).Where(do.UserGroup{
-		Status: "normal",
-	}).Scan(&list); err != nil {
+	if err = dao.AuthRole.Ctx(ctx).Scan(&list); err != nil {
 		return nil, err
 	}
 
 	return list, nil
 }
 
-// 获取分组树数据
-func (s *sUser) GetGroupTreeData(ctx context.Context) (*model.TreeDataOutput, error) {
+// 获取角色树数据
+func (s *sAuth) GetRoleTreeData(ctx context.Context) (*model.TreeDataOutput, error) {
 	var (
 		t   *tree.Tree
 		out *model.TreeDataOutput
 		err error
 	)
-	if t, err = s.getGroupTree(ctx); err != nil {
+	if t, err = s.getRoleTree(ctx); err != nil {
 		return nil, err
 	}
 	out = &model.TreeDataOutput{
@@ -206,15 +204,15 @@ func (s *sUser) GetGroupTreeData(ctx context.Context) (*model.TreeDataOutput, er
 	return out, nil
 }
 
-// 获取分组名称
-func (s *sUser) GetGroupName(ctx context.Context, gourpID uint) (string, error) {
+// 获取角色名称
+func (s *sAuth) GetRoleName(ctx context.Context, roleID uint) (string, error) {
 	var (
 		err error
 		val *gvar.Var
 	)
 
-	if val, err = dao.UserGroup.Ctx(ctx).Fields("name").Where(do.UserGroup{
-		Id: gourpID,
+	if val, err = dao.AuthRole.Ctx(ctx).Fields("name").Where(do.AuthRole{
+		Id: roleID,
 	}).Value(); err != nil {
 		return "", err
 	}
@@ -223,7 +221,7 @@ func (s *sUser) GetGroupName(ctx context.Context, gourpID uint) (string, error) 
 }
 
 // 获取菜单子ID集
-func (s *sUser) GetGroupChildrenIDs(ctx context.Context, groupId uint) ([]uint, error) {
+func (s *sAuth) GetRoleChildrenIDs(ctx context.Context, roleId uint) ([]uint, error) {
 	var (
 		t    *tree.Tree
 		err  error
@@ -232,11 +230,11 @@ func (s *sUser) GetGroupChildrenIDs(ctx context.Context, groupId uint) ([]uint, 
 	)
 
 	// 获取树对象
-	if t, err = s.getGroupTree(ctx); err != nil {
+	if t, err = s.getRoleTree(ctx); err != nil {
 		return nil, err
 	}
 	// 获取子健集
-	if keys, err = t.GetSpecChildKeys(gconv.String(groupId)); err != nil {
+	if keys, err = t.GetSpecChildKeys(gconv.String(roleId)); err != nil {
 		return nil, err
 	}
 	// 格式转换
@@ -247,20 +245,20 @@ func (s *sUser) GetGroupChildrenIDs(ctx context.Context, groupId uint) ([]uint, 
 	return ids, nil
 }
 
-// 检测分组ID集
-func (s *sUser) CheckGroupIds(ctx context.Context, groupIds []uint) ([]uint, error) {
+// 检测角色ID集
+func (s *sAuth) CheckRoleIds(ctx context.Context, roleIds []uint) ([]uint, error) {
 	var (
-		m    = dao.UserGroup.Ctx(ctx)
+		m    = dao.AuthRole.Ctx(ctx)
 		err  error
-		list []*entity.UserGroup
+		list []*entity.AuthRole
 		res  []uint
 	)
 
 	arr := garray.NewIntArray(true)
-	for _, groupId := range groupIds {
-		arr.Append(int(groupId))
+	for _, roleId := range roleIds {
+		arr.Append(int(roleId))
 	}
-	if err = m.Fields("id").Where("id IN(?)", groupIds).Scan(&list); err != nil {
+	if err = m.Fields("id").Where("id IN(?)", roleIds).Scan(&list); err != nil {
 		return nil, err
 	}
 	for _, v := range list {
@@ -271,31 +269,28 @@ func (s *sUser) CheckGroupIds(ctx context.Context, groupIds []uint) ([]uint, err
 			res = append(res, uint(v))
 			return true
 		})
-		return res, gerror.Newf("group_ids is unavailable: %s", arr.String())
+		return res, gerror.Newf("role_ids is unavailable: %s", arr.String())
 	}
 
 	return nil, nil
 }
 
-// 获取分组树
-func (s *sUser) getGroupTree(ctx context.Context) (*tree.Tree, error) {
-	var (
-		list []*entity.UserGroup
-		out  *tree.Tree
-		err  error
-	)
-
-	// 获取全部数据
-	if list, err = s.GetAllGroup(ctx); err != nil {
-		return nil, err
-	}
-
+// 获取角色树
+func (s *sAuth) getRoleTree(ctx context.Context) (*tree.Tree, error) {
 	var (
 		data      = make([]*tree.TreeData, 0)
+		list      []*entity.AuthRole
+		out       *tree.Tree
+		err       error
 		key       string
 		parentKey string
 	)
 
+	// 获取全部数据
+	if list, err = s.GetAllRole(ctx); err != nil {
+		return nil, err
+	}
+	// 组装树数据源
 	for _, v := range list {
 		key = gconv.String(v.Id)
 		if v.ParentId > 0 {
@@ -309,6 +304,7 @@ func (s *sUser) getGroupTree(ctx context.Context) (*tree.Tree, error) {
 			Weight:    v.Weigh,
 		})
 	}
+	// 实例化树
 	if out, err = tree.NewWithData(data); err != nil {
 		return nil, err
 	}
@@ -316,19 +312,19 @@ func (s *sUser) getGroupTree(ctx context.Context) (*tree.Tree, error) {
 	return out, nil
 }
 
-// 检测分组名称
-func (s *sUser) isGroupNameAvailable(ctx context.Context, name string, notIds ...uint) (bool, error) {
+// 检测角色名称
+func (s *sAuth) isRoleNameAvailable(ctx context.Context, name string, notIds ...uint) (bool, error) {
 	var (
-		m     = dao.UserGroup.Ctx(ctx)
+		m     = dao.AuthRole.Ctx(ctx)
 		count int
 		err   error
 	)
 
 	// 过滤统计
 	for _, v := range notIds {
-		m = m.WhereNot(dao.UserGroup.Columns().Id, v)
+		m = m.WhereNot(dao.AuthRole.Columns().Id, v)
 	}
-	if count, err = m.Where(do.UserGroup{
+	if count, err = m.Where(do.AuthRole{
 		Name: name,
 	}).Count(); err != nil {
 		return false, err

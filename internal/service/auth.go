@@ -11,10 +11,6 @@ import (
 )
 
 type IAuth interface {
-	GetBasicAccessRuleIds(ctx context.Context) ([]uint, error)
-	GetAllLimitedAccess(ctx context.Context) ([]uint, error)
-	SetupBasicAccess(ctx context.Context, ruleIds []uint) error
-	SetupLimitedAccess(ctx context.Context, ruleIds []uint) error
 	CreateMenu(ctx context.Context, in *model.AuthMenuCreateInput) (*entity.AuthMenu, error)
 	GetMenu(ctx context.Context, menuId uint) (*entity.AuthMenu, error)
 	GetMenus(ctx context.Context, menuIds []uint) ([]*entity.AuthMenu, error)
@@ -23,6 +19,18 @@ type IAuth interface {
 	DeleteMenu(ctx context.Context, menuId uint) error
 	GetMenuTreeData(ctx context.Context) (*model.TreeDataOutput, error)
 	GetMenuChildrenIds(ctx context.Context, menuId uint) ([]uint, error)
+	CreateRole(ctx context.Context, in *model.AuthRoleCreateInput) (*entity.AuthRole, error)
+	GetRole(ctx context.Context, roleId uint) (*entity.AuthRole, error)
+	UpdateRole(ctx context.Context, in *model.AuthRoleUpdateInput) (*entity.AuthRole, error)
+	DeleteRole(ctx context.Context, roleId uint) error
+	GetAllRole(ctx context.Context) ([]*entity.AuthRole, error)
+	GetRoleTreeData(ctx context.Context) (*model.TreeDataOutput, error)
+	GetRoleName(ctx context.Context, roleID uint) (string, error)
+	GetRoleChildrenIDs(ctx context.Context, roleId uint) ([]uint, error)
+	CheckRoleIds(ctx context.Context, roleIds []uint) ([]uint, error)
+	SetupRoleAccess(ctx context.Context, roleId uint, auth_rule_ids []uint) error
+	DeleteRoleAccessByRuleID(ctx context.Context, ruleId uint) error
+	GetAllRoleAccess(ctx context.Context) ([]*entity.AuthRoleAccess, error)
 	CreateRule(ctx context.Context, in *model.AuthRuleCreateInput) (*entity.AuthRule, error)
 	GetRule(ctx context.Context, nodeId uint) (*entity.AuthRule, error)
 	GetRules(ctx context.Context, ruleIds []uint) ([]*entity.AuthRule, error)

@@ -4,8 +4,8 @@
 
 package entity
 
-// UserGroupAccess is the golang structure for table user_group_access.
-type UserGroupAccess struct {
-	GroupId    uint `json:"groupId"    ` // 用户组ID
-	AuthRuleId uint `json:"authRuleId" ` // 权限规则ID
+// AuthRoleAccess is the golang structure for table auth_role_access.
+type AuthRoleAccess struct {
+	RoleId uint `json:"roleId" ` // 用户组ID
+	RuleId uint `json:"ruleId" ` // 权限规则ID
 }

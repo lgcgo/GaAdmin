@@ -237,22 +237,19 @@ func (s *sAuth) GetMenuChildrenIds(ctx context.Context, menuId uint) ([]uint, er
 // 获取菜单树
 func (s *sAuth) getMenuTree(ctx context.Context) (*tree.Tree, error) {
 	var (
-		list []*entity.AuthMenu
-		out  *tree.Tree
-		err  error
+		data      = make([]*tree.TreeData, 0)
+		list      []*entity.AuthMenu
+		out       *tree.Tree
+		err       error
+		key       string
+		parentKey string
 	)
 
 	// 获取全部数据
 	if list, err = s.GetAllMenu(ctx); err != nil {
 		return nil, err
 	}
-
-	var (
-		data      = make([]*tree.TreeData, 0)
-		key       string
-		parentKey string
-	)
-
+	// 组装树数据源
 	for _, v := range list {
 		key = gconv.String(v.Id)
 		if v.ParentId > 0 {
@@ -266,6 +263,7 @@ func (s *sAuth) getMenuTree(ctx context.Context) (*tree.Tree, error) {
 			Weight:    v.Weigh,
 		})
 	}
+	// 实例化树
 	if out, err = tree.NewWithData(data); err != nil {
 		return nil, err
 	}

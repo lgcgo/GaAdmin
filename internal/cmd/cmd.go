@@ -24,19 +24,18 @@ var (
 					middleware.Response, // 默认响应
 				)
 				group.Bind(
-					controller.UserSign, // 用户登录
+					controller.UserSign,  // 用户登录
+					controller.UserReset, // 重置密码
 				)
 				group.Middleware(middleware.Authentication)
 				group.Bind(
-					controller.AuthAccess,      // 基础权限
-					controller.AuthRule,        // 权限规则
-					controller.AuthMenu,        // 权限菜单
-					controller.OrgDepartment,   // 组织部门
-					controller.OrgMember,       // 组织成员
-					controller.User,            // 用户
-					controller.UserGroup,       // 用户分组
-					controller.UserGroupAccess, // 用户分组权限
-					controller.UserRoles,       // 用户角色
+					controller.AuthMenu,      // 权限菜单
+					controller.AuthRole,      // 权限角色
+					controller.AuthRule,      // 权限规则
+					controller.OrgDepartment, // 组织部门
+					controller.OrgMember,     // 组织成员
+					controller.User,          // 用户管理
+					controller.UserAccess,    // 用户分组
 				)
 			})
 			s.Run()

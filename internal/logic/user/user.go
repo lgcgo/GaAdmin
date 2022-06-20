@@ -113,7 +113,7 @@ func (s *sUser) GetUser(ctx context.Context, userId uint) (*entity.User, error) 
 	)
 
 	// 扫描数据
-	if err = dao.UserGroup.Ctx(ctx).Where(do.User{
+	if err = dao.User.Ctx(ctx).Where(do.User{
 		Id: userId,
 	}).Scan(&ent); err != nil {
 		return nil, err
@@ -130,7 +130,7 @@ func (s *sUser) GetUsers(ctx context.Context, userIds []uint) ([]*entity.User, e
 	)
 
 	// 扫描数据
-	if err = dao.UserGroup.Ctx(ctx).WhereIn("id", userIds).Scan(&list); err != nil {
+	if err = dao.User.Ctx(ctx).WhereIn("id", userIds).Scan(&list); err != nil {
 		return nil, err
 	}
 
@@ -145,7 +145,7 @@ func (s *sUser) GetUserByUuid(ctx context.Context, uuid string) (*entity.User, e
 	)
 
 	// 扫描数据
-	if err = dao.UserGroup.Ctx(ctx).Where(do.User{
+	if err = dao.User.Ctx(ctx).Where(do.User{
 		Uuid: uuid,
 	}).Scan(&ent); err != nil {
 		return nil, err
