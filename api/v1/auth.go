@@ -15,7 +15,7 @@ type AuthRoleResData struct {
 
 // 创建角色
 type AuthRoleCreateReq struct {
-	g.Meta   `path:"/auth/role" tags:"UserService" method:"post" summary:"Create group"`
+	g.Meta   `path:"/auth/role" tags:"AuthService" method:"post" summary:"Create group"`
 	ParentId uint   `json:"parentId" v:"required"`
 	Name     string `json:"name" v:"required"`
 	Title    string `json:"title" v:"required"`
@@ -26,7 +26,7 @@ type AuthRoleCreateRes struct {
 
 // 获取角色
 type AuthRoleGetReq struct {
-	g.Meta `path:"/auth/role" tags:"UserService" method:"get" summary:"Get group"`
+	g.Meta `path:"/auth/role" tags:"AuthService" method:"get" summary:"Get group"`
 	RoleId uint `json:"roleId" v:"required"`
 }
 type AuthRoleGetRes struct {
@@ -35,7 +35,7 @@ type AuthRoleGetRes struct {
 
 // 更新角色
 type AuthRoleUpdateReq struct {
-	g.Meta   `path:"/auth/role" tags:"UserService" method:"put" summary:"Update group"`
+	g.Meta   `path:"/auth/role" tags:"AuthService" method:"put" summary:"Update group"`
 	RoleId   uint   `json:"roleId" v:"required"`
 	ParentId uint   `json:"parentId" v:"required"`
 	Name     string `json:"name" v:"required"`
@@ -47,7 +47,7 @@ type AuthRoleUpdateRes struct {
 
 // 删除角色
 type AuthRoleDeleteReq struct {
-	g.Meta `path:"/auth/role" tags:"UserService" method:"delete" summary:"Delete group"`
+	g.Meta `path:"/auth/role" tags:"AuthService" method:"delete" summary:"Delete group"`
 	RoleId uint `json:"roleId" v:"required"`
 }
 type AuthRoleDeleteRes struct {
@@ -55,7 +55,7 @@ type AuthRoleDeleteRes struct {
 
 // 获取角色树
 type AuthRoleTreeReq struct {
-	g.Meta `path:"/auth/role-tree" tags:"UserService" method:"get" summary:"Get group tree"`
+	g.Meta `path:"/auth/role-tree" tags:"AuthService" method:"get" summary:"Get group tree"`
 }
 type AuthRoleTreeRes struct {
 	TreeResData
@@ -63,7 +63,7 @@ type AuthRoleTreeRes struct {
 
 // 设置角色权限
 type AuthRoleAccessSetupReq struct {
-	g.Meta      `path:"/auth/role-access" tags:"UserService" method:"post" summary:"Setup group access"`
+	g.Meta      `path:"/auth/role-access" tags:"AuthService" method:"post" summary:"Setup group access"`
 	RoleId      uint   `json:"roleId" v:"required"`
 	AuthRuleIds []uint `json:"authRuleIds" v:"required"`
 }

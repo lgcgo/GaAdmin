@@ -29,13 +29,14 @@ var (
 				)
 				group.Middleware(middleware.Authentication)
 				group.Bind(
-					controller.AuthMenu,      // 权限菜单
-					controller.AuthRole,      // 权限角色
-					controller.AuthRule,      // 权限规则
-					controller.OrgDepartment, // 组织部门
-					controller.OrgMember,     // 组织成员
-					controller.User,          // 用户管理
-					controller.UserAccess,    // 用户分组
+					controller.AuthMenu,       // 权限菜单
+					controller.AuthRole,       // 权限角色
+					controller.AuthRoleAccess, // 角色授权
+					controller.AuthRule,       // 权限规则
+					controller.OrgDepartment,  // 组织部门
+					controller.OrgMember,      // 组织成员
+					controller.User,           // 用户管理
+					controller.UserAccess,     // 用户授权
 				)
 			})
 			s.Run()
