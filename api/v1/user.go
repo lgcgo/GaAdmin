@@ -22,12 +22,12 @@ type UserResData struct {
 // 创建用户（用于后台，账户密码必填）
 type UserCreateReq struct {
 	g.Meta   `path:"/user" method:"post" tags:"UserService" summary:"Create user"`
-	Account  string `json:"account" v:"required"`  // 账号
-	Password string `json:"password" v:"required"` // 密码
-	Nickname string `json:"nickname" v:"required"` // 昵称
-	Avatar   string `json:"avatar"`                // 头像
-	Mobile   string `json:"mobile"`                // 手机号
-	Email    string `json:"email"`                 // 电子邮箱
+	Account  string `json:"account" v:"required|passport"`     // 账号
+	Password string `json:"password" v:"required|length:6,18"` // 密码
+	Nickname string `json:"nickname" v:"required|length:6,18"` // 昵称
+	Mobile   string `json:"mobile" v:"phone"`                  // 手机号
+	Email    string `json:"email" v:"email"`                   // 电子邮箱
+	Avatar   string `json:"avatar"`                            // 头像
 }
 type UserCreateRes struct {
 	UserResData
@@ -36,7 +36,7 @@ type UserCreateRes struct {
 // 获取用户
 type UserGetReq struct {
 	g.Meta `path:"/user" method:"get" tags:"UserService" summary:"Get user"`
-	UserId uint `json:"userId" v:"required"`
+	UserId uint `json:"userId" v:"required|integer"`
 }
 type UserGetRes struct {
 	UserResData
@@ -45,13 +45,13 @@ type UserGetRes struct {
 // 修改用户
 type UserUpdateReq struct {
 	g.Meta   `path:"/user" method:"put" tags:"UserService" summary:"Update user"`
-	UserId   uint   `json:"userId" v:"required"`
-	Account  string `json:"account"`  // 账号
-	Password string `json:"password"` // 密码
-	Nickname string `json:"nickname"` // 昵称
-	Avatar   string `json:"avatar"`   // 头像
-	Mobile   string `json:"mobile"`   // 手机号
-	Email    string `json:"email"`    // 电子邮箱
+	UserId   uint   `json:"userId" v:"required|integer"` // 用户ID
+	Account  string `json:"account" v:"passport"`        // 账号
+	Password string `json:"password" v:"password"`       // 密码
+	Nickname string `json:"nickname" v:"length:6,18"`    // 昵称
+	Mobile   string `json:"mobile" v:"phone"`            // 手机号
+	Email    string `json:"email" v:"email"`             // 电子邮箱
+	Avatar   string `json:"avatar"`                      // 头像
 }
 type UserUpdateRes struct {
 	UserResData
@@ -60,7 +60,7 @@ type UserUpdateRes struct {
 // 删除用户
 type UserDeleteReq struct {
 	g.Meta `path:"/user" method:"delete" tags:"UserService" summary:"Delete user"`
-	UserId uint `json:"userId" v:"required"`
+	UserId uint `json:"userId" v:"required|integer"`
 }
 type UserDeleteRes struct{}
 
@@ -114,13 +114,13 @@ type UserSignRefreshRes struct {
 // - 当手存在机号|邮箱，则验证码必填
 type UserSignUpReq struct {
 	g.Meta   `path:"/user/sign-up" method:"post" tags:"UserService" summary:"Sign up"`
-	Account  string `json:"account" v:"required-without-all:Mobile,Email|length:4,32"` // 账号
-	Password string `json:"password" v:"required-with:Account|length:6,32"`            // 密码
-	Nickname string `json:"nickname" v:"required|length:4,32"`                         // 昵称
-	Mobile   string `json:"mobile" v:"required-without-all:Account,Email|phone"`       // 手机号
-	Captcha  string `json:"captcha" v:"required-with:Mobile,Email|length:4,8"`         // 验证码
-	Email    string `json:"email" v:"required-without-all:Account,Mobile|email"`       // 电子邮箱
-	Avatar   string `json:"avatar"`                                                    // 头像
+	Account  string `json:"account" v:"required-without-all:Mobile,Email|passport"` // 账号
+	Password string `json:"password" v:"required-with:Account|password"`            // 密码
+	Nickname string `json:"nickname" v:"required|length:6,18"`                      // 昵称
+	Mobile   string `json:"mobile" v:"required-without-all:Account,Email|phone"`    // 手机号
+	Captcha  string `json:"captcha" v:"required-with:Mobile,Email|length:4,8"`      // 验证码
+	Email    string `json:"email" v:"required-without-all:Account,Mobile|email"`    // 电子邮箱
+	Avatar   string `json:"avatar"`                                                 // 头像
 }
 type UserSignUpRes struct {
 	TokenResData
@@ -130,8 +130,8 @@ type UserSignUpRes struct {
 // 登录次数超过后，服务要求 Captcha 验证
 type UserSignPassportReq struct {
 	g.Meta   `path:"/user/sign-passport" tags:"UserService" method:"post" summary:"Sign in passport"`
-	Passport string `json:"passport" v:"required|length:4,32"` // 账户|手机号|邮箱
-	Password string `json:"password" v:"required|length:6,32"` // 密码
+	Passport string `json:"passport" v:"required|length:6,18"` // 账户|手机号|邮箱
+	Password string `json:"password" v:"required|password"`    // 密码
 	Captcha  string `json:"captcha" v:"length:4,8"`            // 验证码
 }
 type UserSignPassportRes struct {
@@ -174,8 +174,8 @@ type UserResetEmailRes struct {
 
 // 问答 密码重置
 type UserResetAnswer struct {
-	QuestionId uint   // 问题ID
-	AnswerText string // 回答内容
+	QuestionId uint   `json:"questionId" v:"required"`            // 问题ID
+	Content    string `json:"content"  v:"required|min-length:3"` // 回答内容
 }
 type UserResetQuestionReq struct {
 	g.Meta  `path:"/user/password/reset-question" tags:"UserService" method:"post" summary:"Reset password question"`

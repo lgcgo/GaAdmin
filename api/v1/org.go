@@ -9,7 +9,6 @@ import "github.com/gogf/gf/v2/frame/g"
 type OrgDepartmentResData struct {
 	Id       uint   `json:"departmentId"`
 	ParentId uint   `json:"parentId"`
-	Name     string `json:"name"`
 	Title    string `json:"title"`
 	Weigh    uint   `json:"weigh"`
 }
@@ -17,10 +16,9 @@ type OrgDepartmentResData struct {
 // 创建部门
 type OrgDepartmentCreateReq struct {
 	g.Meta   `path:"/org/department" tags:"OrgService" method:"post" summary:"Create department"`
-	ParentId uint   `json:"parentId" v:"required"`
-	Name     string `json:"name" v:"required"`
-	Title    string `json:"title" v:"required"`
-	Weigh    uint   `json:"weigh"`
+	ParentId uint   `json:"parentId" v:"required|integer"`
+	Title    string `json:"title" v:"required|length:4,16"`
+	Weigh    uint   `json:"weigh" v:"integer|between:0,9999"`
 }
 type OrgDepartmentCreateRes struct {
 	OrgDepartmentResData
@@ -29,7 +27,7 @@ type OrgDepartmentCreateRes struct {
 // 获取部门
 type OrgDepartmentGetReq struct {
 	g.Meta       `path:"/org/department" tags:"OrgService" method:"get" summary:"Get department"`
-	DepartmentId uint `json:"departmentId" v:"required"`
+	DepartmentId uint `json:"departmentId" v:"required|integer"`
 }
 type OrgDepartmentGetRes struct {
 	OrgDepartmentResData
@@ -38,10 +36,10 @@ type OrgDepartmentGetRes struct {
 // 更新部门
 type OrgDepartmentUpdateReq struct {
 	g.Meta       `path:"/org/department" tags:"OrgService" method:"put" summary:"Update department"`
-	DepartmentId uint   `json:"departmentId" v:"required"`
-	ParentId     uint   `json:"parentId" v:"required"`
-	Title        string `json:"title" v:"required"`
-	Weigh        uint   `json:"weigh"`
+	DepartmentId uint   `json:"departmentId" v:"required|integer"`
+	ParentId     uint   `json:"parentId" v:"required|integer"`
+	Title        string `json:"title" v:"required|length:4,16"`
+	Weigh        uint   `json:"weigh" v:"integer|between:0,9999"`
 }
 type OrgDepartmentUpdateRes struct {
 	OrgDepartmentResData
@@ -50,7 +48,7 @@ type OrgDepartmentUpdateRes struct {
 // 删除部门
 type OrgDepartmentDeleteReq struct {
 	g.Meta       `path:"/org/department" tags:"OrgService" method:"delete" summary:"Delete department"`
-	DepartmentId uint `json:"departmentId" v:"required"`
+	DepartmentId uint `json:"departmentId" v:"required|integer"`
 }
 type OrgDepartmentDeleteRes struct {
 }
@@ -98,9 +96,9 @@ type OrgMemberGetRes struct {
 // 修改成员
 type OrgMemberUpdateReq struct {
 	g.Meta   `path:"/org/member" method:"put" tags:"OrgService" summary:"Update member"`
-	MemberId uint   `json:"memberId" v:"required"` // 成员ID
-	Realname string `json:"realname" v:"required"` // 真实名称
-	No       string `json:"no"`                    // 工号
+	MemberId uint   `json:"memberId" v:"required|integer"` // 成员ID
+	Realname string `json:"realname" v:"required"`         // 真实名称
+	No       string `json:"no"`                            // 工号
 }
 type OrgMemberUpdateRes struct {
 	OrgMemberResData
@@ -109,7 +107,7 @@ type OrgMemberUpdateRes struct {
 // 删除成员
 type OrgMemberDeleteReq struct {
 	g.Meta   `path:"/org/member" method:"delete" tags:"OrgService" summary:"Delete member"`
-	MemberId uint `json:"memberId" v:"required"` // 成员Id
+	MemberId uint `json:"memberId" v:"required|integer"` // 成员Id
 }
 type OrgMemberDeleteRes struct {
 }

@@ -16,9 +16,9 @@ type AuthRoleResData struct {
 // 创建角色
 type AuthRoleCreateReq struct {
 	g.Meta   `path:"/auth/role" tags:"AuthService" method:"post" summary:"Create group"`
-	ParentId uint   `json:"parentId" v:"required"`
-	Name     string `json:"name" v:"required"`
-	Title    string `json:"title" v:"required"`
+	ParentId uint   `json:"parentId" v:"required|integer"`
+	Name     string `json:"name" v:"required|length:4,16"`
+	Title    string `json:"title" v:"required|length:4,16"`
 }
 type AuthRoleCreateRes struct {
 	AuthRoleResData
@@ -27,7 +27,7 @@ type AuthRoleCreateRes struct {
 // 获取角色
 type AuthRoleGetReq struct {
 	g.Meta `path:"/auth/role" tags:"AuthService" method:"get" summary:"Get group"`
-	RoleId uint `json:"roleId" v:"required"`
+	RoleId uint `json:"roleId" v:"required|integer"`
 }
 type AuthRoleGetRes struct {
 	AuthRoleResData
@@ -36,10 +36,10 @@ type AuthRoleGetRes struct {
 // 更新角色
 type AuthRoleUpdateReq struct {
 	g.Meta   `path:"/auth/role" tags:"AuthService" method:"put" summary:"Update group"`
-	RoleId   uint   `json:"roleId" v:"required"`
-	ParentId uint   `json:"parentId" v:"required"`
-	Name     string `json:"name" v:"required"`
-	Title    string `json:"title" v:"required"`
+	RoleId   uint   `json:"roleId" v:"required|integer"`
+	ParentId uint   `json:"parentId" v:"required|integer"`
+	Name     string `json:"name" v:"required|length:4,16"`
+	Title    string `json:"title" v:"required|length:4,16"`
 }
 type AuthRoleUpdateRes struct {
 	AuthRoleResData
@@ -48,7 +48,7 @@ type AuthRoleUpdateRes struct {
 // 删除角色
 type AuthRoleDeleteReq struct {
 	g.Meta `path:"/auth/role" tags:"AuthService" method:"delete" summary:"Delete group"`
-	RoleId uint `json:"roleId" v:"required"`
+	RoleId uint `json:"roleId" v:"required|integer"`
 }
 type AuthRoleDeleteRes struct {
 }
@@ -64,33 +64,12 @@ type AuthRoleTreeRes struct {
 // 设置角色权限
 type AuthRoleAccessSetupReq struct {
 	g.Meta      `path:"/auth/role-access" tags:"AuthService" method:"post" summary:"Setup group access"`
-	RoleId      uint   `json:"roleId" v:"required"`
-	AuthRuleIds []uint `json:"authRuleIds" v:"required"`
+	RoleId      uint   `json:"roleId" v:"required|integer"`
+	AuthRuleIds []uint `json:"authRuleIds"`
 }
 type AuthRoleAccessSetupRes struct {
 	RoleId      uint   `json:"roleId"`
 	AuthRuleIds []uint `json:"authRuleIds"`
-}
-
-/**
-* 基础权限
-**/
-// 设置基础权限
-type AuthAccessSetupBasicReq struct {
-	g.Meta  `path:"/auth/access/setup-basic" tags:"AuthService" method:"post" summary:"Setup basic access"`
-	RuleIds []uint `json:"ruleIds" v:"required"`
-}
-type AuthAccessSetupBasicRes struct {
-	RuleIds []uint `json:"ruleIds"`
-}
-
-// 设置限制权限（被禁用时仍拥有的权限）
-type AuthAccessSetupLimitedReq struct {
-	g.Meta  `path:"/auth/access/setup-limited" tags:"AuthService" method:"post" summary:"Setup limited access"`
-	RuleIds []uint `json:"ruleIds" v:"required"`
-}
-type AuthAccessSetupLimitedRes struct {
-	RuleIds []uint `json:"ruleIds"`
 }
 
 /**
@@ -108,10 +87,10 @@ type AuthMenuResData struct {
 // 创建权限菜单
 type AuthMenuCreateReq struct {
 	g.Meta   `path:"/auth/menu" tags:"AuthService" method:"post" summary:"Create menu"`
-	ParentId uint   `json:"parentId" v:"required"`
-	Title    string `json:"title" v:"required"`
-	Remark   string `json:"remark"`
-	Weigh    uint   `json:"weigh"`
+	ParentId uint   `json:"parentId" v:"required|integer"`
+	Title    string `json:"title" v:"required|length:4,16"`
+	Remark   string `json:"remark" v:"max-length:32"`
+	Weigh    uint   `json:"weigh" v:"between:0,9999"`
 }
 type AuthMenuCreateRes struct {
 	AuthMenuResData
@@ -129,11 +108,11 @@ type AuthMenuGetRes struct {
 // 更新权限菜单
 type AuthMenuUpdateReq struct {
 	g.Meta   `path:"/auth/menu" tags:"AuthService" method:"put" summary:"Update menu"`
-	MenuId   uint   `json:"menuId" v:"required"`
-	ParentId uint   `json:"parentId" v:"required"`
-	Title    string `json:"title" v:"required"`
-	Remark   string `json:"remark"`
-	Weigh    uint   `json:"weigh"`
+	MenuId   uint   `json:"menuId" v:"required|integer"`
+	ParentId uint   `json:"parentId" v:"required|integer"`
+	Title    string `json:"title" v:"required|length:4,16"`
+	Remark   string `json:"remark" v:"max-length:32"`
+	Weigh    uint   `json:"weigh" v:"between:0,9999"`
 }
 type AuthMenuUpdateRes struct {
 	AuthMenuResData
@@ -142,7 +121,7 @@ type AuthMenuUpdateRes struct {
 // 删除权限菜单
 type AuthMenuDeleteReq struct {
 	g.Meta `path:"/auth/menu" tags:"AuthService" method:"delete" summary:"Delete menu"`
-	MenuId uint `json:"menuId" v:"required"`
+	MenuId uint `json:"menuId" v:"required|integer"`
 }
 type AuthMenuDeleteRes struct {
 }
@@ -172,13 +151,13 @@ type AuthRuleResData struct {
 // 创建权限节点
 type AuthRuleCreateReq struct {
 	g.Meta    `path:"/auth/rule" tags:"AuthService" method:"post" summary:"Create rule"`
-	MenuId    uint   `json:"menuId" v:"required"`
-	Title     string `json:"title" v:"required"`
-	Path      string `json:"path" v:"required"`
+	MenuId    uint   `json:"menuId" v:"required|integer"`
+	Title     string `json:"title" v:"required|length:4,16"`
+	Path      string `json:"path" v:"required|length:2,64"`
 	Method    string `json:"method" v:"required|in:GET,POST,PUT,DELETE,PATCH"`
-	Condition string `json:"condition"`
-	Remark    string `json:"remark"`
-	Weigh     uint   `json:"weigh"`
+	Condition string `json:"condition" v:"max-length:512"`
+	Remark    string `json:"remark" v:"max-length:32"`
+	Weigh     uint   `json:"weigh" v:"integer|between:0,9999"`
 }
 type AuthRuleCreateRes struct {
 	AuthRuleResData
@@ -187,7 +166,7 @@ type AuthRuleCreateRes struct {
 // 获取权限节点
 type AuthRuleGetReq struct {
 	g.Meta `path:"/auth/rule" tags:"AuthService" method:"get" summary:"Get rule"`
-	RuleId uint `json:"ruleId" v:"required"`
+	RuleId uint `json:"ruleId" v:"required|integer"`
 }
 type AuthRuleGetRes struct {
 	AuthRuleResData
@@ -196,13 +175,14 @@ type AuthRuleGetRes struct {
 // 更新权限节点
 type AuthRuleUpdateReq struct {
 	g.Meta    `path:"/auth/rule" tags:"AuthService" method:"put" summary:"Update rule"`
-	RuleId    uint   `json:"ruleId" v:"required"`
-	MenuId    uint   `json:"menuId" v:"required"`
-	Title     string `json:"title" v:"required"`
-	Path      string `json:"path" v:"required"`
+	RuleId    uint   `json:"ruleId" v:"required|integer"`
+	MenuId    uint   `json:"menuId" v:"required|integer"`
+	Title     string `json:"title" v:"required|length:4,16"`
+	Path      string `json:"path" v:"required|length:2,64"`
 	Method    string `json:"method" v:"required|in:GET,POST,PUT,DELETE,PATCH"`
-	Condition string `json:"condition"`
-	Remark    string `json:"remark"`
+	Condition string `json:"condition" v:"max-length:512"`
+	Remark    string `json:"remark" v:"max-length:32"`
+	Weigh     uint   `json:"weigh" v:"integer|between:0,9999"`
 }
 type AuthRuleUpdateRes struct {
 	AuthRuleResData
@@ -211,7 +191,7 @@ type AuthRuleUpdateRes struct {
 // 删除权限节点
 type AuthRuleDeleteReq struct {
 	g.Meta `path:"/auth/rule" tags:"AuthService" method:"delete" summary:"Delete rule"`
-	RuleId uint `json:"ruleId" v:"required"`
+	RuleId uint `json:"ruleId" v:"required|integer"`
 }
 type AuthRuleDeleteRes struct {
 }
