@@ -78,8 +78,8 @@ type UserListRes struct {
 * 用户角色
 **/
 type UserAccessSetupReq struct {
-	g.Meta  `path:"/user/roles" tags:"UserService" method:"post" summary:"Setup roles"`
-	UserId  uint   `json:"userId" v:"required"`
+	g.Meta  `path:"/user/access" tags:"UserService" method:"post" summary:"Setup access"`
+	UserId  uint   `json:"userId" v:"required|integer"`
 	RoleIds []uint `json:"roleIds"`
 }
 type UserAccessSetupRes struct {
