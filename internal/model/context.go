@@ -17,5 +17,4 @@ type ContextUser struct {
 	Id       uint   // 用户ID
 	Nickname string // 用户名称
 	Avatar   string // 用户头像
-	IsAdmin  bool   // 是否是后台管理员
 }
