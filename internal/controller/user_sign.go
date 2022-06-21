@@ -2,6 +2,7 @@ package controller
 
 import (
 	v1 "GaAdmin/api/v1"
+	"GaAdmin/internal/consts"
 	"GaAdmin/internal/model"
 	"GaAdmin/internal/model/entity"
 	"GaAdmin/internal/service"
@@ -36,8 +37,14 @@ func (c *cUserSign) SignUp(ctx context.Context, req *v1.UserSignUpReq) (*v1.User
 	if ent, err = service.User().CreateUser(ctx, in); err != nil {
 		return nil, err
 	}
-	// 签发授权(普通用户)
-	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, "user"); err != nil {
+	// 签发授权
+	var issueRole string
+	if ent.Id == uint(consts.RootAdminId) {
+		issueRole = "root"
+	} else {
+		issueRole = "user"
+	}
+	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, issueRole); err != nil {
 		return nil, err
 	}
 	// 转换响应
@@ -67,7 +74,13 @@ func (c *cUserSign) SignPassport(ctx context.Context, req *v1.UserSignPassportRe
 		return nil, err
 	}
 	// 签发授权(普通用户)
-	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, "user"); err != nil {
+	var issueRole string
+	if ent.Id == uint(consts.RootAdminId) {
+		issueRole = "root"
+	} else {
+		issueRole = "user"
+	}
+	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, issueRole); err != nil {
 		return nil, err
 	}
 	// 转换响应
@@ -96,8 +109,14 @@ func (c *cUserSign) SignMobile(ctx context.Context, req *v1.UserSignMobileReq) (
 	if ent, err = service.User().SignMobile(ctx, in); err != nil {
 		return nil, err
 	}
-	// 签发授权(普通用户)
-	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, "user"); err != nil {
+	// 签发授权
+	var issueRole string
+	if ent.Id == uint(consts.RootAdminId) {
+		issueRole = "root"
+	} else {
+		issueRole = "user"
+	}
+	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, issueRole); err != nil {
 		return nil, err
 	}
 	// 转换响应

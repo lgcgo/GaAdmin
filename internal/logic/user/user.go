@@ -1,6 +1,7 @@
 package user
 
 import (
+	"GaAdmin/internal/consts"
 	"GaAdmin/internal/dao"
 	"GaAdmin/internal/model"
 	"GaAdmin/internal/model/do"
@@ -166,6 +167,12 @@ func (s *sUser) UpdateUser(ctx context.Context, in *model.UserUpdateInput) (*ent
 		available bool
 	)
 
+	// 特殊过滤 (超级管理员只能自己修改)
+	if in.UserId == uint(consts.RootAdminId) {
+		if service.Context().Get(ctx).User.Id != uint(consts.RootAdminId) {
+			return nil, gerror.New("superadmin can only modify by himself")
+		}
+	}
 	// 扫描数据
 	if ent, err = s.GetUser(ctx, in.UserId); err != nil {
 		return nil, err
@@ -225,23 +232,27 @@ func (s *sUser) UpdateUser(ctx context.Context, in *model.UserUpdateInput) (*ent
 }
 
 // 删除用户
-func (s *sUser) DeleteUser(ctx context.Context, id uint) error {
+func (s *sUser) DeleteUser(ctx context.Context, userId uint) error {
 	var (
 		ent *entity.User
 		err error
 	)
 
+	// 限制删除超级管理员
+	if userId == uint(consts.RootAdminId) {
+		return gerror.Newf("can not delete superadmin")
+	}
 	// 扫描数据
-	if ent, err = s.GetUser(ctx, id); err != nil {
+	if ent, err = s.GetUser(ctx, userId); err != nil {
 		return err
 	}
 	if ent == nil {
-		return gerror.Newf("user is not exists")
+		return gerror.Newf("user is not exists: %d", userId)
 	}
 
 	// 删除数据
 	return dao.User.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
-		_, err = dao.User.Ctx(ctx).Where(dao.User.Columns().Id, id).Delete()
+		_, err = dao.User.Ctx(ctx).Where(dao.User.Columns().Id, userId).Delete()
 		return err
 	})
 }
