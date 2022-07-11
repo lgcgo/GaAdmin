@@ -19,7 +19,7 @@ type IUser interface {
 	GetUsers(ctx context.Context, userIds []uint) ([]*entity.User, error)
 	GetUserByUuid(ctx context.Context, uuid string) (*entity.User, error)
 	UpdateUser(ctx context.Context, in *model.UserUpdateInput) (*entity.User, error)
-	DeleteUser(ctx context.Context, id uint) error
+	DeleteUser(ctx context.Context, userId uint) error
 	GetUserPage(ctx context.Context, in *model.Page) (*model.UserPageOutput, error)
 	GetCurrentUser(ctx context.Context) (*entity.User, error)
 	UpdateUserAccount(ctx context.Context, account string) error
