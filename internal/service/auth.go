@@ -8,9 +8,16 @@ import (
 	"GaAdmin/internal/model"
 	"GaAdmin/internal/model/entity"
 	"context"
+
+	"github.com/gogf/gf/v2/frame/g"
 )
 
 type IAuth interface {
+	InitRbac() error
+	Authorization(subject string, role string) (*model.TokenOutput, error)
+	RefreshAuthorization(ticket string) (*model.TokenOutput, error)
+	VerifyToken(ticket string) (g.Map, error)
+	VerifyRequest(path, method, role string) error
 	CreateMenu(ctx context.Context, in *model.AuthMenuCreateInput) (*entity.AuthMenu, error)
 	GetMenu(ctx context.Context, menuId uint) (*entity.AuthMenu, error)
 	GetMenus(ctx context.Context, menuIds []uint) ([]*entity.AuthMenu, error)

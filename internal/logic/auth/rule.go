@@ -5,7 +5,6 @@ import (
 	"GaAdmin/internal/model"
 	"GaAdmin/internal/model/do"
 	"GaAdmin/internal/model/entity"
-	"GaAdmin/internal/service"
 	"context"
 
 	"github.com/gogf/gf/v2/container/garray"
@@ -134,7 +133,7 @@ func (s *sAuth) UpdateRule(ctx context.Context, in *model.AuthRuleUpdateInput) (
 		return nil, err
 	}
 	// 更新授权政策
-	service.Oauth().SavePolicy(ctx)
+	// service.Oauth().SavePolicy(ctx)
 
 	ent, _ = s.GetRule(ctx, in.RuleId)
 	return ent, nil
@@ -170,7 +169,7 @@ func (s *sAuth) DeleteRule(ctx context.Context, ruleId uint) error {
 		return err
 	}
 	// 更新授权政策
-	service.Oauth().SavePolicy(ctx)
+	// service.Oauth().SavePolicy(ctx)
 
 	return nil
 }

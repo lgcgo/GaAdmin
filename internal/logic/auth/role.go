@@ -5,7 +5,6 @@ import (
 	"GaAdmin/internal/model"
 	"GaAdmin/internal/model/do"
 	"GaAdmin/internal/model/entity"
-	"GaAdmin/internal/service"
 	"context"
 
 	"github.com/gogf/gf/v2/container/garray"
@@ -53,7 +52,7 @@ func (s *sAuth) CreateRole(ctx context.Context, in *model.AuthRoleCreateInput) (
 		return nil, err
 	}
 	// 更新授权政策
-	service.Oauth().SavePolicy(ctx)
+	// service.Oauth().SavePolicy(ctx)
 	// 获取实体
 	ent, _ = s.GetRole(ctx, uint(insertId))
 
@@ -133,7 +132,7 @@ func (s *sAuth) UpdateRole(ctx context.Context, in *model.AuthRoleUpdateInput) (
 		return nil, err
 	}
 	// 更新授权政策
-	service.Oauth().SavePolicy(ctx)
+	// service.Oauth().SavePolicy(ctx)
 	// 获取实体
 	ent, _ = s.GetRole(ctx, in.RoleId)
 
@@ -167,7 +166,7 @@ func (s *sAuth) DeleteRole(ctx context.Context, roleId uint) error {
 		return err
 	}
 	// 更新授权政策
-	service.Oauth().SavePolicy(ctx)
+	// service.Oauth().SavePolicy(ctx)
 
 	return nil
 }

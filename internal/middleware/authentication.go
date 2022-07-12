@@ -5,7 +5,7 @@ import (
 	"GaAdmin/internal/model/entity"
 	"GaAdmin/internal/service"
 	"GaAdmin/utility/response"
-	"fmt"
+	"strings"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
@@ -14,22 +14,39 @@ import (
 // 权限认证中间件
 func Authentication(r *ghttp.Request) {
 	var (
-		ser       = service.Oauth()
-		claims    g.Map
-		err       error
-		issueRole string
-		ok        bool
+		auth   = service.Auth()
+		claims g.Map
+		err    error
+		ok     bool
 	)
 
+	if err = auth.InitRbac(); err != nil {
+		response.JsonErrorExit(r, "-1", "system busy")
+	}
+
+	// Header传值 Authorization: Bearer <token>
+	if r.Header.Get("Authorization") == "" {
+		panic("headers authorization not exists")
+	}
+	strArr := strings.SplitN(r.Header.Get("Authorization"), " ", 2)
+
+	// 支持Bearer方案
+	if strArr[0] != "Bearer" {
+		panic("authorization scheme not support")
+	}
+
+	// 获取Token票据
+	tokenTicket := strArr[1]
+
 	// 验证授权
-	if claims, err = ser.ValidAuthorization(r); err != nil {
+	if claims, err = auth.VerifyToken(tokenTicket); err != nil {
 		response.JsonErrorExit(r, "11003", "invalid token")
 	}
+
 	// 从签名中获取用户角色
-	issueRole = claims["isr"].(string)
+	role := claims["isr"].(string)
 	// 验证权限
-	if ok, err = ser.CheckPath(r, issueRole); err != nil {
-		fmt.Println(err.Error())
+	if err = auth.VerifyRequest(r.URL.Path, r.Method, role); err != nil {
 		response.JsonErrorExit(r, "-1", "system busy")
 	}
 	if !ok {
@@ -48,6 +65,7 @@ func Authentication(r *ghttp.Request) {
 			response.JsonErrorExit(r, "-1", "system busy")
 		}
 	}
+
 	// 设置上下文用户
 	service.Context().SetUser(r.Context(), &model.ContextUser{
 		Id:       user.Id,

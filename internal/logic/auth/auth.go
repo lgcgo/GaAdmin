@@ -5,6 +5,7 @@ import (
 	"GaAdmin/internal/service"
 	"time"
 
+	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/util/gconv"
@@ -23,7 +24,7 @@ func New() *sAuth {
 	return &sAuth{}
 }
 
-func (s *sAuth) Init() error {
+func (s *sAuth) InitRbac() error {
 	var (
 		ctx                       = gctx.New()
 		tokenSignKeyCfg           = g.Cfg().MustGet(ctx, "rbac.tokenSignKey").Bytes()
@@ -67,9 +68,8 @@ func (s *sAuth) Authorization(subject string, role string) (*model.TokenOutput, 
 		out   *model.TokenOutput
 	)
 
-	// 初始化
-	if err = s.Init(); err != nil {
-		return nil, err
+	if s.r == nil {
+		return nil, gerror.New("rbac has not initialze")
 	}
 	if token, err = s.r.Authorization(subject, role); err != nil {
 		return nil, err
@@ -88,9 +88,8 @@ func (s *sAuth) RefreshAuthorization(ticket string) (*model.TokenOutput, error) 
 		out   *model.TokenOutput
 	)
 
-	// 初始化
-	if err = s.Init(); err != nil {
-		return nil, err
+	if s.r == nil {
+		return nil, gerror.New("rbac has not initialze")
 	}
 	if token, err = s.r.RefreshAuthorization(ticket); err != nil {
 		return nil, err
@@ -109,11 +108,9 @@ func (s *sAuth) VerifyToken(ticket string) (g.Map, error) {
 		err error
 	)
 
-	// 初始化
-	if err = s.Init(); err != nil {
-		return nil, err
+	if s.r == nil {
+		return nil, gerror.New("rbac has not initialze")
 	}
-
 	if out, err = s.r.VerifyToken(ticket); err != nil {
 		return nil, err
 	}
@@ -123,13 +120,8 @@ func (s *sAuth) VerifyToken(ticket string) (g.Map, error) {
 
 // 验证路由
 func (s *sAuth) VerifyRequest(path, method, role string) error {
-	var (
-		err error
-	)
-
-	// 初始化
-	if err = s.Init(); err != nil {
-		return err
+	if s.r == nil {
+		return gerror.New("rbac has not initialze")
 	}
 
 	return s.r.VerifyRequest(path, method, role)

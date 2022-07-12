@@ -53,7 +53,7 @@ func (s *sAuth) SetupRoleAccess(ctx context.Context, roleId uint, auth_rule_ids 
 		return err
 	}
 	// 更新授权政策
-	service.Oauth().SavePolicy(ctx)
+	// service.Oauth().SavePolicy(ctx)
 
 	return nil
 }

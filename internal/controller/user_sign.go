@@ -37,14 +37,22 @@ func (c *cUserSign) SignUp(ctx context.Context, req *v1.UserSignUpReq) (*v1.User
 	if ent, err = service.User().CreateUser(ctx, in); err != nil {
 		return nil, err
 	}
+
 	// 签发授权
-	var issueRole string
+	var (
+		auth = service.Auth()
+		role string
+	)
+
 	if ent.Id == uint(consts.RootAdminId) {
-		issueRole = "root"
+		role = "root"
 	} else {
-		issueRole = "user"
+		role = "user"
 	}
-	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, issueRole); err != nil {
+	if err = auth.InitRbac(); err != nil {
+		return nil, err
+	}
+	if out, err = auth.Authorization(ent.Uuid, role); err != nil {
 		return nil, err
 	}
 	// 转换响应
@@ -73,14 +81,18 @@ func (c *cUserSign) SignPassport(ctx context.Context, req *v1.UserSignPassportRe
 	if ent, err = service.User().SignPassport(ctx, in); err != nil {
 		return nil, err
 	}
+
 	// 签发授权(普通用户)
-	var issueRole string
+	var (
+		auth = service.Auth()
+		role string
+	)
 	if ent.Id == uint(consts.RootAdminId) {
-		issueRole = "root"
+		role = "root"
 	} else {
-		issueRole = "user"
+		role = "user"
 	}
-	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, issueRole); err != nil {
+	if out, err = auth.Authorization(ent.Uuid, role); err != nil {
 		return nil, err
 	}
 	// 转换响应
@@ -109,16 +121,22 @@ func (c *cUserSign) SignMobile(ctx context.Context, req *v1.UserSignMobileReq) (
 	if ent, err = service.User().SignMobile(ctx, in); err != nil {
 		return nil, err
 	}
+
 	// 签发授权
-	var issueRole string
+	var (
+		auth = service.Auth()
+		role string
+	)
+
 	if ent.Id == uint(consts.RootAdminId) {
-		issueRole = "root"
+		role = "root"
 	} else {
-		issueRole = "user"
+		role = "user"
 	}
-	if out, err = service.Oauth().Authorization(ctx, ent.Uuid, issueRole); err != nil {
+	if out, err = auth.Authorization(ent.Uuid, role); err != nil {
 		return nil, err
 	}
+
 	// 转换响应
 	if err = gconv.Struct(out, &res); err != nil {
 		return nil, err
@@ -130,13 +148,14 @@ func (c *cUserSign) SignMobile(ctx context.Context, req *v1.UserSignMobileReq) (
 // 刷新Token
 func (c *cUserSign) Refresh(ctx context.Context, req *v1.UserSignRefreshReq) (*v1.UserSignRefreshRes, error) {
 	var (
-		res *v1.UserSignRefreshRes
-		err error
-		out *model.TokenOutput
+		auth = service.Auth()
+		res  *v1.UserSignRefreshRes
+		out  *model.TokenOutput
+		err  error
 	)
 
 	// 刷新授权
-	if out, err = service.Oauth().RefreshAuthorization(ctx, req.RefreshToken); err != nil {
+	if out, err = auth.RefreshAuthorization(req.RefreshToken); err != nil {
 		return nil, err
 	}
 	// 转换响应
